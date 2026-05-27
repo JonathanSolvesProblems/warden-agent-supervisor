@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Warden dependencies.
+#
+# The SIMULATION engine + CLI demo require ZERO third-party packages — it runs
+# on the Python standard library alone (tested on 3.11–3.14). Everything below
+# is only needed to enable the web dashboard and/or LIVE (Gemini + Dynatrace)
+# mode. Install into a venv: see README. ADK officially targets Python 3.10–3.13,
+# so use a 3.12/3.13 venv for LIVE mode if you are on 3.14.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Web dashboard (required for the hackathon's web-platform rule)
+fastapi>=0.115
+uvicorn[standard]>=0.34
+python-dotenv>=1.0
+
+# LIVE mode — Warden's brain (Gemini) + MCP tool-calling
+google-adk>=1.0          # canonical Agent Builder / ADK path (see docs/DEPLOY.md)
+google-genai>=1.0        # Gemini 3 structured reasoning (warden/supervisor/gemini_brain.py)
+mcp>=1.2                 # Model Context Protocol client -> Dynatrace MCP server (needs Node 22.10+)
+
+# LIVE mode — agent self-instrumentation shipped to Dynatrace (OpenTelemetry)
+opentelemetry-sdk>=1.27
+opentelemetry-exporter-otlp>=1.27
