@@ -1,7 +1,7 @@
 """The subjects of supervision: a small fleet of autonomous worker agents.
 
 These stand in for real production agents (Gemini/ADK agents in LIVE mode). Each
-emits OpenTelemetry-style signals every tick. Warden never trusts them — it only
+emits OpenTelemetry-style signals every tick. Warden never trusts them; it only
 observes them through Dynatrace.
 """
 

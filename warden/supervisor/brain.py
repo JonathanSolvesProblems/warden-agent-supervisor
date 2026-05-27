@@ -1,8 +1,8 @@
 """Warden's reasoning. Two interchangeable brains behind one interface:
 
-* `ScriptedBrain` — deterministic heuristics; runs offline with no model. Lets
+* `ScriptedBrain`: deterministic heuristics; runs offline with no model. Lets
   the whole supervisory loop be tested and demoed without credentials.
-* `GeminiBrain`  — Gemini 3 (the hackathon's required model) turns the same
+* `GeminiBrain`: Gemini 3 (the hackathon's required model) turns the same
   evidence into a structured diagnosis. Wired in `gemini_brain.py`.
 
 Both return the identical `Diagnosis` shape, so the policy/intervention layers

@@ -1,4 +1,4 @@
-"""McpDynatrace — the LIVE adapter to the real Dynatrace MCP server.
+"""McpDynatrace: the LIVE adapter to the real Dynatrace MCP server.
 
 Launches `@dynatrace-oss/dynatrace-mcp-server` (Node) over stdio and speaks the
 Model Context Protocol to it, so Warden's senses are real production telemetry
@@ -9,7 +9,7 @@ the mock, so Warden's loop is byte-for-byte identical across modes.
 Requires: the `mcp` Python package (pip install mcp) and Node v22.10+ on PATH.
 Auth comes from the environment (DT_ENVIRONMENT + DT_PLATFORM_TOKEN, or OAuth);
 see .env.example. Confirm exact tool argument names against the server's own
-schema via `list_tools()` — Warden introspects on connect and logs them.
+schema via `list_tools()`. Warden introspects on connect and logs them.
 """
 
 from __future__ import annotations

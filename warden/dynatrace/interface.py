@@ -8,7 +8,7 @@ from typing import Protocol, runtime_checkable
 
 @dataclass
 class Problem:
-    """A Dynatrace 'problem' — an anomaly Davis (or the mock detectors) surfaced."""
+    """A Dynatrace 'problem': an anomaly Davis (or the mock detectors) surfaced."""
 
     problem_id: str
     title: str

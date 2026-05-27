@@ -5,9 +5,9 @@ Dynatrace MCP server's tools (list_problems, execute_dql,
 generate_dql_from_natural_language, chat_with_davis_copilot, send_slack_message,
 create_workflow_for_notification, …). Two implementations satisfy it:
 
-* `MockDynatrace`  — derives problems/DQL answers from the local TelemetryStore
+* `MockDynatrace`: derives problems/DQL answers from the local TelemetryStore
                      (SIMULATION mode, zero credentials).
-* `McpDynatrace`   — proxies to the live Dynatrace MCP server via Google ADK
+* `McpDynatrace`: proxies to the live Dynatrace MCP server via Google ADK
                      (LIVE mode). See `mcp_client.py`.
 
 Swapping modes never changes a line of Warden's reasoning code.

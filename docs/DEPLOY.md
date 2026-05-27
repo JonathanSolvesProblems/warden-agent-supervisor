@@ -40,7 +40,7 @@ WARDEN_MODE=live python -m scripts.demo --ticks 20
 
 Warden uses an explicit governance loop (deterministic safety + human-in-the-loop)
 with Gemini for judgment. The same Dynatrace MCP server is what an ADK `LlmAgent`
-consumes natively — include this in the submission to show the blessed path:
+consumes natively. Include this in the submission to show the blessed path:
 
 ```python
 from google.adk.agents import LlmAgent
@@ -67,7 +67,7 @@ warden_agent = LlmAgent(
 
 ## 4. Deploy to Google Cloud
 
-**Option A — Cloud Run (the web dashboard + API):**
+**Option A: Cloud Run (the web dashboard + API):**
 
 ```bash
 gcloud run deploy warden \
@@ -78,14 +78,14 @@ gcloud run deploy warden \
 ```
 
 Put `DT_PLATFORM_TOKEN` and any keys in **Secret Manager**; never commit them.
-The web server reads `WARDEN_WEB_PORT` (Cloud Run sets `$PORT` — map it).
+The web server reads `WARDEN_WEB_PORT` (Cloud Run sets `$PORT`, map it).
 
-**Option B — Agent Runtime / Agent Engine:** deploy the ADK agent from §3 to the
+**Option B: Agent Runtime / Agent Engine:** deploy the ADK agent from §3 to the
 managed runtime for long-running, stateful supervision; front it with the Cloud
 Run dashboard for the operator console.
 
 ## 5. Self-observability (closing the loop)
 
 Instrument Warden itself with OpenTelemetry and export to Dynatrace, so the
-supervisor is observable too — see Dynatrace's AI-agent instrumentation examples:
+supervisor is observable too. See Dynatrace's AI-agent instrumentation examples:
 https://github.com/dynatrace-oss/dynatrace-ai-agent-instrumentation-examples

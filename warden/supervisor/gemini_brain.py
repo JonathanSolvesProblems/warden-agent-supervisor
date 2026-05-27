@@ -1,10 +1,10 @@
-"""GeminiBrain — Warden's reasoning powered by Gemini 3 (the required model).
+"""GeminiBrain: Warden's reasoning powered by Gemini 3 (the required model).
 
 Design choice that matters: Gemini supplies *judgment* (failure class, severity,
 recommended action, plain-language summary) while the **dollar figures and
 reversibility are computed deterministically in Python from the telemetry**.
-The model never invents money math. This keeps the impact numbers honest — the
-quality the Dynatrace judges explicitly said they look for — and prevents prompt
+The model never invents money math. This keeps the impact numbers honest (the
+quality the Dynatrace judges explicitly said they look for) and prevents prompt
 injection in agent telemetry from inflating a blast radius.
 
 Requires `google-genai` and either Vertex AI creds (GOOGLE_CLOUD_PROJECT) or a

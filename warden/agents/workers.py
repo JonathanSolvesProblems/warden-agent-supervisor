@@ -70,7 +70,7 @@ class PricingAgent(WorkerAgent):
             self._emit("heartbeat", attributes={"state": "idle"})
 
     def _tick_rogue(self) -> None:
-        # Sets near-zero prices — each is a large potential revenue loss.
+        # Sets near-zero prices: each is a large potential revenue loss.
         self._emit(
             "action",
             action_type="adjust_price",

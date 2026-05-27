@@ -1,4 +1,4 @@
-"""MockDynatrace — implements the Dynatrace tool surface from the TelemetryStore.
+"""MockDynatrace: implements the Dynatrace tool surface from the TelemetryStore.
 
 The detectors below stand in for Davis AI: they scan the rolling telemetry
 window and raise Problems for error spikes, cost spikes, runaway action rates,

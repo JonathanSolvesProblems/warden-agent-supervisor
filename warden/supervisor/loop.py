@@ -2,7 +2,7 @@
 
 Designed to be driven one step at a time (after each fleet tick) so a CLI or a
 web dashboard can stream the agent's thinking live. Warden only perceives the
-fleet through the Dynatrace tool surface — never the raw store.
+fleet through the Dynatrace tool surface, never the raw store.
 """
 
 from __future__ import annotations
@@ -107,11 +107,11 @@ class Warden:
             human_approval_required=plan.needs_approval,
         )
 
-        # 1) Autonomous containment — execute immediately.
+        # 1) Autonomous containment: execute immediately.
         for action in plan.auto_actions:
             incident.actions_taken.append(self._execute_action(action, agent, onset))
 
-        # 2) Human-gated actions — request approval, then proceed if granted.
+        # 2) Human-gated actions: request approval, then proceed if granted.
         if plan.gated_actions:
             preview = {"incident_id": incident.incident_id, "agent": agent,
                        "diagnosis": diagnosis.to_dict()}
@@ -134,7 +134,7 @@ class Warden:
         return incident
 
     def _gather(self, problem: dict, agent: str) -> dict:
-        """Forensics via the Dynatrace tools — exactly the MCP calls used in LIVE mode."""
+        """Forensics via the Dynatrace tools, exactly the MCP calls used in LIVE mode."""
         dql = self.dt.generate_dql_from_natural_language(f"list actions for {agent} to scope rollback")
         rollup = self.dt.execute_dql("summarize actions by agent")
         agent_actions = self.dt.execute_dql(f"fetch action records for {agent}")

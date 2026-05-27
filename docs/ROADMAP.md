@@ -2,7 +2,7 @@
 
 Status of the Warden build for the Google Cloud Rapid Agent Hackathon.
 
-## Done — runnable today (simulation mode, zero credentials)
+## Done: runnable today (simulation mode, zero credentials)
 
 - [x] Telemetry store + reversible action ledger (`warden/telemetry`)
 - [x] Dynatrace tool contract + mock that mirrors the real MCP tool surface (`warden/dynatrace`)
@@ -18,7 +18,7 @@ Status of the Warden build for the Google Cloud Rapid Agent Hackathon.
 - [x] Live adapters: Gemini brain + Dynatrace MCP client (`mcp_client.py`)
 - [x] Tests (`tests/`)
 
-## Next — to harden for submission
+## Next: to harden for submission
 
 - [ ] Validate LIVE mode against a real Dynatrace tenant; confirm MCP tool arg schemas.
 - [ ] Deploy the canonical ADK `LlmAgent` + `McpToolset` (docs/DEPLOY.md §3) to Agent Runtime.
@@ -30,7 +30,7 @@ Status of the Warden build for the Google Cloud Rapid Agent Hackathon.
 
 ## Submission checklist (from the rules)
 
-- [ ] Public repo, OSI license visible in About — **Apache-2.0 present** (`LICENSE`).
+- [ ] Public repo, OSI license visible in About, Apache-2.0 present (`LICENSE`).
 - [ ] Hosted/testable URL (Cloud Run).
 - [ ] ≤3-min demo video (English / subtitled).
 - [ ] Writeup: features, tech, data sources, learnings.
