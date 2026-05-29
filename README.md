@@ -1,9 +1,10 @@
 # Warden: the agent that governs your agents
 
-Warden is an autonomous agent-reliability supervisor. It is built on Gemini 3 and
-Google Cloud Agent Builder, and it watches a fleet of production AI agents through
-the Dynatrace MCP server. When one agent goes rogue, Warden catches it, diagnoses
-it, and contains it under human oversight before it does more damage.
+Warden is an autonomous agent-reliability supervisor. It uses Gemini (via the
+`gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud Agent Builder
+/ Vertex) and watches a fleet of production AI agents through the Dynatrace MCP
+server. When one agent goes rogue, Warden catches it, diagnoses it, and contains it
+under human oversight before it does more damage.
 
 Submission for the Google Cloud Rapid Agent Hackathon (Dynatrace track).
 
@@ -29,7 +30,7 @@ moment an agent's behavior goes out of policy.
         Dynatrace  <----  list_problems / execute_dql / chat_with_davis_copilot
               ^ (MCP server)                                            |
               |                                                         |
-        WARDEN  (Gemini 3 reasoning, Google ADK)                        |
+        WARDEN  (Gemini reasoning via google-genai SDK)                 |
           1. SENSE    pull problems + telemetry from Dynatrace via MCP  |
           2. REASON   classify: which agent, what failure, blast radius |
           3. DECIDE   apply policy: act autonomously, or ask a human  --+
@@ -112,7 +113,7 @@ Cloud Run / Agent Runtime deployment.
 
 | Layer | Component | Tech |
 |---|---|---|
-| Brain | `warden/supervisor` | Gemini 3 via Google ADK, with a scripted fallback for offline dev |
+| Brain | `warden/supervisor` | Gemini via the `google-genai` SDK (Flash on the loop, Pro on Vertex paid quota), with a scripted fallback for offline dev |
 | Senses | `warden/dynatrace` | Dynatrace MCP server (mock mirror for offline dev) |
 | Hands | `warden/supervisor/interventions.py` | pause / rollback / alert behind a human-approval gate |
 | Subjects | `warden/agents` | simulated worker-agent fleet, OpenTelemetry-instrumented |
