@@ -101,7 +101,8 @@ python -m venv .venv && .venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 copy .env.example .env                             # set GCP + Dynatrace values
 set WARDEN_MODE=live
-python -m scripts.demo
+python -m scripts.live_check                       # smoke test: MCP handshake + tool calls
+python -m scripts.demo                             # full loop against real Dynatrace
 ```
 
 See [docs/DEPLOY.md](docs/DEPLOY.md) for the canonical ADK + MCP toolset pattern and
@@ -122,9 +123,12 @@ Cloud Run / Agent Runtime deployment.
 ## Status
 
 Core is complete and runs offline. The CLI demo, the web dashboard, and the test
-suite are all verified. Live mode (Gemini plus the real Dynatrace MCP server) is
-code-complete and imports cleanly, but is not yet validated against a real tenant.
-See [docs/ROADMAP.md](docs/ROADMAP.md) for what is done and what remains.
+suite are all verified. The **live Dynatrace MCP handshake is now verified**
+against a real tenant: 20 tools enumerated, `list_problems`, `execute_dql`, and
+`chat_with_davis_copilot` all return live data (`python -m scripts.live_check`).
+Still pending: wiring the worker-agent fleet's OpenTelemetry exporter to push
+real telemetry into Dynatrace, plus Cloud Run deploy. See
+[docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 
