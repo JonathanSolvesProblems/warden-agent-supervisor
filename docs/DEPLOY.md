@@ -1,7 +1,7 @@
 # Deploying Warden (LIVE mode)
 
 Warden runs the identical supervisory loop in two modes. `sim` needs nothing.
-`live` swaps in **Gemini 3** (the required model) as the brain and the **real
+`live` swaps in **Gemini** (via the `gemini-flash-latest` / `gemini-pro-latest` aliases) as the brain and the **real
 Dynatrace MCP server** as the senses. This doc covers going live + deploying to
 Google Cloud.
 
@@ -49,7 +49,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 
 warden_agent = LlmAgent(
-    model="gemini-flash-latest",            # Gemini 3 Flash for the monitoring loop
+    model="gemini-flash-latest",            # Flash for the high-frequency monitoring loop
     name="warden",
     instruction="Supervise the agent fleet; contain rogue agents under human oversight.",
     tools=[McpToolset(
