@@ -107,6 +107,38 @@ class TestInterventions(unittest.TestCase):
         self.assertGreater(result["dollars_recovered"], 0)
 
 
+class TestScopeFilter(unittest.TestCase):
+    """Warden must ignore Dynatrace problems about entities not in its fleet."""
+
+    def test_problems_about_unknown_entities_are_dropped(self):
+        store, fleet, _, injector = build_world()
+
+        class StubDt:
+            """Returns one fleet problem and one foreign problem each cycle."""
+            def list_problems(self):
+                return [
+                    {"affectedEntity": "refund-agent", "title": "Anomalous high-value action",
+                     "severityLevel": "CRITICAL", "signal": "anomalous_value", "metricValue": 500},
+                    {"affectedEntity": "HOST-XYZ-NOT-OURS", "title": "Disk usage high",
+                     "severityLevel": "WARNING", "signal": "infra", "metricValue": 91},
+                ]
+            def execute_dql(self, query): return []
+            def generate_dql_from_natural_language(self, prompt): return ""
+            def chat_with_davis_copilot(self, question): return ""
+            def find_entity_by_name(self, name): return {}
+            def send_slack_message(self, channel, message): return {"ok": True}
+            def send_event(self, title, properties): return {"ok": True}
+            def create_workflow_for_notification(self, name, trigger, message): return {"ok": True}
+
+        dt = StubDt()
+        warden = Warden(fleet, dt, store, brain=ScriptedBrain(),
+                        gate=AutoApproveGate(True), injector=injector)
+        warden.step()
+        opened_agents = [i.suspect_agent for i in warden.log.incidents]
+        self.assertIn("refund-agent", opened_agents)
+        self.assertNotIn("HOST-XYZ-NOT-OURS", opened_agents)
+
+
 class TestFullLoop(unittest.TestCase):
     def test_loop_contains_rogue_and_opens_incident(self):
         store, fleet, dt, injector = build_world()

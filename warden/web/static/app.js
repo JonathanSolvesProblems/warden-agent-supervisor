@@ -40,7 +40,7 @@ function renderScenarios(scenarios) {
   Object.entries(scenarios).forEach(([key, s]) => {
     const b = document.createElement("button");
     b.className = "btn scenario-btn";
-    b.innerHTML = `${s.label}<small>${s.agent_id} — ${s.description}</small>`;
+    b.innerHTML = `${s.label}<small><b>${s.agent_id}</b>: ${s.description}</small>`;
     b.onclick = () => fetch("/api/inject", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ scenario: key }),
@@ -48,6 +48,8 @@ function renderScenarios(scenarios) {
     el.appendChild(b);
   });
 }
+
+let LATEST_INCIDENTS = [];
 
 function renderMetrics(summary) {
   $("m-incidents").textContent = summary.incidents;
@@ -58,6 +60,7 @@ function renderMetrics(summary) {
 }
 
 function renderIncidents(incidents) {
+  LATEST_INCIDENTS = incidents || [];
   const el = $("incidents");
   el.innerHTML = "";
   if (!incidents.length) { el.innerHTML = `<p class="dim">No incidents yet. Inject a scenario to watch Warden respond.</p>`; return; }
@@ -65,21 +68,63 @@ function renderIncidents(incidents) {
     const approved = i.human_approval_required
       ? (i.human_approved ? `<span class="ok">approved</span>` : `<span class="no">denied/pending</span>`)
       : "n/a (autonomous)";
+    const mttd = i.mttd_ticks == null ? "n/a" : i.mttd_ticks + " ticks";
     const card = document.createElement("div");
-    card.className = "incident";
+    card.className = "incident clickable";
+    card.title = "Click for full diagnosis, plan, and actions";
     card.innerHTML = `
       <div class="ihead"><span>${i.incident_id} · ${i.suspect_agent}</span><span>sev ${i.diagnosis.severity}</span></div>
       <div class="imeta">
         ${i.diagnosis.failure_class}<br/>
-        MTTD: ${i.mttd_ticks} ticks · reasoned by ${i.diagnosis.reasoned_by}<br/>
+        MTTD: ${mttd}, reasoned by ${i.diagnosis.reasoned_by}<br/>
         human approval: ${approved}<br/>
         <span class="ok">recovered ${money(i.dollars_recovered)}</span> ·
         <span class="no">lost ${money(i.irreversible_loss_at_detection)}</span><br/>
         prevented (est.) ${money(i.projected_loss_prevented)}
       </div>`;
+    card.onclick = () => openIncident(i.incident_id);
     el.appendChild(card);
   });
 }
+
+function openIncident(id) {
+  const i = LATEST_INCIDENTS.find(x => x.incident_id === id);
+  if (!i) return;
+  const d = i.diagnosis;
+  const planRows = (i.plan && i.plan.actions || []).map(a =>
+    `<tr><td>${a.kind}${a.needs_approval ? ' <span class="no">(needs approval)</span>' : ''}</td><td>${escapeHtml(a.detail || '')}</td></tr>`
+  ).join('');
+  const actionRows = (i.actions_taken || []).map(a =>
+    `<tr><td>${a.action}</td><td>${a.agent || ''}</td><td>${a.ok === false ? '<span class="no">withheld</span>' : '<span class="ok">ok</span>'}</td><td>${escapeHtml(a.detail || '')}</td></tr>`
+  ).join('');
+  $("modal-body").innerHTML = `
+    <h2>${i.incident_id} on ${i.suspect_agent}</h2>
+    <p class="dim">Detected at tick ${i.detect_tick}, onset tick ${i.onset_tick == null ? 'n/a' : i.onset_tick}, MTTD ${i.mttd_ticks == null ? 'n/a' : i.mttd_ticks + ' ticks'}, reasoned by ${d.reasoned_by}.</p>
+    <h3>Diagnosis</h3>
+    <table class="kv">
+      <tr><th>failure class</th><td>${d.failure_class}</td></tr>
+      <tr><th>severity</th><td>${d.severity}</td></tr>
+      <tr><th>blast radius</th><td>${money(d.blast_radius_usd)}</td></tr>
+      <tr><th>reversible</th><td>${d.reversible}</td></tr>
+      <tr><th>recommended</th><td>${d.recommended_action}</td></tr>
+      <tr><th>confidence</th><td>${d.confidence}</td></tr>
+    </table>
+    <p>${escapeHtml(d.summary || '')}</p>
+    <h3>Plan: ${escapeHtml(i.plan && i.plan.rationale || '')}</h3>
+    <table class="plan"><thead><tr><th>step</th><th>detail</th></tr></thead><tbody>${planRows}</tbody></table>
+    <h3>Actions taken</h3>
+    <table class="plan"><thead><tr><th>kind</th><th>agent</th><th>result</th><th>detail</th></tr></thead><tbody>${actionRows}</tbody></table>
+    <h3>Measured outcome</h3>
+    <table class="kv">
+      <tr><th>$ recovered (hard)</th><td class="ok">${money(i.dollars_recovered)}</td></tr>
+      <tr><th>$ irreversible loss</th><td class="no">${money(i.irreversible_loss_at_detection)}</td></tr>
+      <tr><th>$ projected loss prevented</th><td>${money(i.projected_loss_prevented)} <span class="dim">(estimate)</span></td></tr>
+    </table>`;
+  $("modal").classList.remove("hidden");
+}
+
+function closeIncident() { $("modal").classList.add("hidden"); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function showApproval(detail) {
   $("approval-detail").textContent = detail || "";
@@ -107,7 +152,7 @@ function handleEvent(msg) {
       renderFleet(payload.states);
       break;
     case "chaos":
-      feedLine("chaos", `&#9888; ${payload.agent} went ROGUE — ${payload.label}`);
+      feedLine("chaos", `&#9888; <b>${payload.agent}</b> went ROGUE: ${payload.label}`);
       break;
     case "sense": {
       const n = (payload.problems || []).filter(p => !(payload.handled || []).includes(p.affectedEntity));
@@ -155,6 +200,9 @@ function connect() {
 $("approve-btn").onclick = () => { fetch("/api/decision", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved: true }) }); hideApproval(); };
 $("deny-btn").onclick = () => { fetch("/api/decision", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved: false }) }); hideApproval(); };
 $("reset-btn").onclick = () => fetch("/api/reset", { method: "POST" });
+$("modal-close").onclick = closeIncident;
+$("modal").onclick = (e) => { if (e.target.id === "modal") closeIncident(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeIncident(); });
 
 (async function init() {
   const s = await (await fetch("/api/state")).json();

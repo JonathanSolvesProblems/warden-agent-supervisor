@@ -75,11 +75,20 @@ class Warden:
     def step(self) -> list[Incident]:
         """Run one supervision cycle. Returns incidents opened this cycle."""
         problems = self.dt.list_problems()
-        self._notify("sense", {"problems": problems, "tick": self.store.tick,
-                              "handled": sorted(self._handled)})
+        # In live mode the tenant returns problems about every monitored entity.
+        # Warden only supervises *its* fleet, so anything else is ignored. This
+        # keeps the operator console silent until our fleet itself emits a
+        # signal Dynatrace flags.
+        fleet_agents = set(self.fleet.agents.keys())
+        in_scope = [p for p in problems
+                    if p.get("affectedEntity") in fleet_agents]
+        out_of_scope = len(problems) - len(in_scope)
+        self._notify("sense", {"problems": in_scope, "tick": self.store.tick,
+                              "handled": sorted(self._handled),
+                              "out_of_scope": out_of_scope})
         opened: list[Incident] = []
-        for problem in problems:
-            agent = problem.get("affectedEntity", "unknown")
+        for problem in in_scope:
+            agent = problem["affectedEntity"]
             if agent in self._handled:
                 continue
             opened.append(self._handle(problem, agent))
