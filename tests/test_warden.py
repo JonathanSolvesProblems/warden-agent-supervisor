@@ -110,7 +110,8 @@ class TestInterventions(unittest.TestCase):
 class TestFullLoop(unittest.TestCase):
     def test_loop_contains_rogue_and_opens_incident(self):
         store, fleet, dt, injector = build_world()
-        warden = Warden(fleet, dt, store, gate=AutoApproveGate(True), injector=injector)
+        warden = Warden(fleet, dt, store, brain=ScriptedBrain(),
+                        gate=AutoApproveGate(True), injector=injector)
         run(warden, fleet, injector, ticks=30, inject="refund_fraud_loop", inject_at=8)
         self.assertEqual(len(warden.log.incidents), 1)
         inc = warden.log.incidents[0]
@@ -121,7 +122,8 @@ class TestFullLoop(unittest.TestCase):
 
     def test_denied_approval_withholds_gated_action_but_still_pauses(self):
         store, fleet, dt, injector = build_world()
-        warden = Warden(fleet, dt, store, gate=AutoApproveGate(False), injector=injector)
+        warden = Warden(fleet, dt, store, brain=ScriptedBrain(),
+                        gate=AutoApproveGate(False), injector=injector)
         run(warden, fleet, injector, ticks=20, inject="refund_fraud_loop", inject_at=8)
         inc = warden.log.incidents[0]
         self.assertTrue(inc.human_approval_required)
