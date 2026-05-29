@@ -80,7 +80,10 @@ h1, h2 { margin: 0; }
 .grid {
   display: grid; grid-template-columns: 300px 1fr 360px; gap: 16px;
   padding: 6px 22px 28px;
+  transition: opacity 0.3s ease, filter 0.3s ease;
 }
+.grid.resetting { opacity: 0.35; filter: blur(1px); pointer-events: none; }
+.btn:disabled { opacity: 0.55; cursor: progress; pointer-events: none; }
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
   padding: 16px; min-height: 60vh;

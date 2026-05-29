@@ -53,7 +53,7 @@ let LATEST_INCIDENTS = [];
 
 function renderMetrics(summary) {
   $("m-incidents").textContent = summary.incidents;
-  $("m-mttd").textContent = summary.avg_mttd_ticks == null ? "—" : summary.avg_mttd_ticks + " ticks";
+  $("m-mttd").textContent = summary.avg_mttd_ticks == null ? "n/a" : summary.avg_mttd_ticks + " ticks";
   $("m-recovered").textContent = money(summary.dollars_recovered);
   $("m-loss").textContent = money(summary.irreversible_loss);
   $("m-prevented").textContent = money(summary.projected_loss_prevented);
@@ -178,7 +178,7 @@ function handleEvent(msg) {
       hideApproval();
       break;
     case "action":
-      feedLine("action", `${payload.action} on ${payload.agent}${payload.dollars_recovered ? " — recovered " + money(payload.dollars_recovered) : ""}`);
+      feedLine("action", `${payload.action} on ${payload.agent}${payload.dollars_recovered ? ", recovered " + money(payload.dollars_recovered) : ""}`);
       break;
     case "incident":
       feedLine("incident", `${payload.incident_id} opened for ${payload.suspect_agent} (MTTD ${payload.mttd_ticks} ticks)`);
@@ -199,7 +199,24 @@ function connect() {
 
 $("approve-btn").onclick = () => { fetch("/api/decision", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved: true }) }); hideApproval(); };
 $("deny-btn").onclick = () => { fetch("/api/decision", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved: false }) }); hideApproval(); };
-$("reset-btn").onclick = () => fetch("/api/reset", { method: "POST" });
+$("reset-btn").onclick = async () => {
+  const btn = $("reset-btn");
+  if (btn.disabled) return;
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = "Resetting...";
+  closeIncident();
+  hideApproval();
+  const grid = document.querySelector("main.grid");
+  grid.classList.add("resetting");
+  try {
+    await fetch("/api/reset", { method: "POST" });
+    await new Promise(r => setTimeout(r, 450));
+  } catch (_) { /* network blip is fine, button still re-enables below */ }
+  grid.classList.remove("resetting");
+  btn.disabled = false;
+  btn.textContent = original;
+};
 $("modal-close").onclick = closeIncident;
 $("modal").onclick = (e) => { if (e.target.id === "modal") closeIncident(); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeIncident(); });
