@@ -61,7 +61,45 @@ def main() -> int:
         print(f"DQL query skipped ({exc})")
 
     print()
-    print("OK: live Dynatrace MCP handshake + tool calls verified.")
+    print("--- Gemini brain (synthetic Dynatrace problem) ---")
+    try:
+        from warden.supervisor.brain import build_brain
+
+        brain = build_brain()
+        print(f"brain selected: {brain.name}")
+        synth_problem = {
+            "affectedEntity": "refund-agent",
+            "signal": "anomalous_value",
+            "title": "Anomalous high-value action on refund-agent",
+            "severityLevel": "CRITICAL",
+            "metricValue": 750.0,
+        }
+        synth_evidence = {
+            "problem": synth_problem,
+            "davis": "Davis: refund-agent shows a burst of high-fraud-score irreversible refunds.",
+            "rollup": [{"agent": "refund-agent", "actions": 5, "errors": 0,
+                        "cost_usd": 0.01, "value_usd": 1500.0, "max_value_usd": 600.0}],
+            "agent_actions": [
+                {"value.usd": 600, "reversible": False, "rolled.back": False},
+                {"value.usd": 500, "reversible": False, "rolled.back": False},
+                {"value.usd": 400, "reversible": False, "rolled.back": False},
+            ],
+        }
+        diag = brain.diagnose(synth_problem, synth_evidence)
+        print(f"  failure_class      : {diag.failure_class}")
+        print(f"  severity           : {diag.severity}")
+        print(f"  recommended_action : {diag.recommended_action}")
+        print(f"  reversible         : {diag.reversible}")
+        print(f"  blast_radius_usd   : ${diag.blast_radius_usd:,.2f}")
+        print(f"  confidence         : {diag.confidence}")
+        print(f"  reasoned_by        : {diag.reasoned_by}")
+        print(f"  summary            : {diag.summary[:240]}")
+    except Exception as exc:
+        print(f"  brain test failed: {exc}")
+        return 1
+
+    print()
+    print("OK: live Dynatrace MCP handshake + brain diagnosis verified.")
     return 0
 
 

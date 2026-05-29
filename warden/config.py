@@ -68,7 +68,9 @@ class GeminiConfig:
     project: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
     location: str = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
     model: str = os.getenv("WARDEN_GEMINI_MODEL", "gemini-flash-latest")
-    reasoning_model: str = os.getenv("WARDEN_GEMINI_REASONING_MODEL", "gemini-pro-latest")
+    # Default to Flash so the brain runs on the AI Studio free tier out of the box.
+    # Switch to gemini-pro-latest when running on Vertex with paid quota.
+    reasoning_model: str = os.getenv("WARDEN_GEMINI_REASONING_MODEL", "gemini-flash-latest")
     use_vertex: bool = os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
 
 
