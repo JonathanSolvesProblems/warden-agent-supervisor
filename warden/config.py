@@ -82,5 +82,17 @@ class DynatraceConfig:
     slack_webhook: str = os.getenv("SLACK_WEBHOOK_URL", "")
 
 
+@dataclass(frozen=True)
+class PrivacyConfig:
+    # Hard kill switch: force ScriptedBrain even when LIVE mode would otherwise
+    # select Gemini. For tenants where even aggregate signals cannot leave the
+    # perimeter, set WARDEN_DISABLE_GENERATIVE=true.
+    disable_generative: bool = os.getenv("WARDEN_DISABLE_GENERATIVE", "").lower() in {"1", "true", "yes"}
+    # Append-only log of every generative-model call: timestamp, model, hashes,
+    # sizes, dropped fields. Never raw content. Empty path disables logging.
+    audit_log_path: str = os.getenv("WARDEN_AUDIT_LOG", "warden_audit.log")
+
+
 GEMINI = GeminiConfig()
 DYNATRACE = DynatraceConfig()
+PRIVACY = PrivacyConfig()

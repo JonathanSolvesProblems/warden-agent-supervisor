@@ -18,6 +18,7 @@ import json
 
 from .. import config
 from .brain import Diagnosis
+from .privacy import audit, safe_for_llm
 
 _SYSTEM = (
     "You are Warden, a reliability supervisor for a fleet of autonomous AI agents "
@@ -80,17 +81,17 @@ class GeminiBrain:
         reversible = irreversible_value <= 0.0
 
         # --- ask Gemini for judgment -----------------------------------------
-        prompt = json.dumps(
-            {
-                "dynatrace_problem": problem,
-                "davis_root_cause": evidence.get("davis", ""),
-                "fleet_rollup": evidence.get("rollup", []),
-                "suspect_agent": agent,
-                "value_at_risk_usd": value_at_risk,
-                "has_irreversible_actions": not reversible,
-            },
-            default=str,
-        )
+        # Privacy: allowlist what crosses the trust boundary to the model.
+        raw_payload = {
+            "dynatrace_problem": problem,
+            "davis_root_cause": evidence.get("davis", ""),
+            "fleet_rollup": evidence.get("rollup", []),
+            "suspect_agent": agent,
+            "value_at_risk_usd": value_at_risk,
+            "has_irreversible_actions": not reversible,
+        }
+        safe_payload, dropped = safe_for_llm(raw_payload)
+        prompt = json.dumps(safe_payload, default=str)
         resp = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
@@ -100,6 +101,15 @@ class GeminiBrain:
                 "response_schema": _SCHEMA,
                 "temperature": 0,
             },
+        )
+        # Append-only audit: hashes + sizes + dropped fields, never raw content.
+        audit(
+            model=self.model,
+            vertex=config.GEMINI.use_vertex,
+            prompt=prompt,
+            response=resp.text or "",
+            dropped=dropped,
+            log_path=config.PRIVACY.audit_log_path,
         )
         data = json.loads(resp.text)
 

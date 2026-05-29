@@ -99,9 +99,17 @@ class ScriptedBrain:
 
 
 def build_brain() -> Brain:
-    """Return the Gemini brain in LIVE mode, else the scripted brain."""
+    """Return the Gemini brain in LIVE mode, else the scripted brain.
+
+    Honors the WARDEN_DISABLE_GENERATIVE kill switch: when set, ScriptedBrain
+    is used unconditionally. This is the "no aggregates leave the perimeter"
+    deployment posture for highly sensitive tenants.
+    """
     from .. import config
 
+    if config.PRIVACY.disable_generative:
+        print("[warden] WARDEN_DISABLE_GENERATIVE=true; using ScriptedBrain only.")
+        return ScriptedBrain()
     if config.is_live():
         try:
             from .gemini_brain import GeminiBrain
