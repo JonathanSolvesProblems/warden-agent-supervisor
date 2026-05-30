@@ -7,8 +7,8 @@ create_workflow_for_notification, …). Two implementations satisfy it:
 
 * `MockDynatrace`: derives problems/DQL answers from the local TelemetryStore
                      (SIMULATION mode, zero credentials).
-* `McpDynatrace`: proxies to the live Dynatrace MCP server via Google ADK
-                     (LIVE mode). See `mcp_client.py`.
+* `McpDynatrace`: proxies to the live Dynatrace MCP server via the `mcp`
+                     Python SDK (LIVE mode). See `mcp_client.py`.
 
 Swapping modes never changes a line of Warden's reasoning code.
 """

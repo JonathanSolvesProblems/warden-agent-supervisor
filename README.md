@@ -102,9 +102,14 @@ python -m venv .venv && .venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 copy .env.example .env                             # set GCP + Dynatrace values
 set WARDEN_MODE=live
-python -m scripts.live_check                       # smoke test: MCP handshake + tool calls
+python -m scripts.live_check                       # MCP handshake + Gemini diagnosis
+python -m scripts.otel_smoke                       # ship OTel spans + metrics to Dynatrace
 python -m scripts.demo                             # full loop against real Dynatrace
 ```
+
+For `scripts.otel_smoke` to work, the Dynatrace token needs OTLP-ingest scopes
+(`openTelemetryTrace.ingest`, `metrics.ingest`, `logs.ingest`). See `.env.example`
+for the auth options (`DT_API_TOKEN` classic, `DT_OTEL_BEARER` platform).
 
 See [docs/DEPLOY.md](docs/DEPLOY.md) for the canonical ADK + MCP toolset pattern and
 Cloud Run / Agent Runtime deployment.

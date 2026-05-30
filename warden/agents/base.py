@@ -74,7 +74,7 @@ class WorkerAgent:
     ) -> AgentEvent:
         if kind == "action":
             self.actions_taken += 1
-        return self.store.emit(
+        event = self.store.emit(
             AgentEvent(
                 tick=self.store.tick,
                 agent_id=self.agent_id,
@@ -88,3 +88,13 @@ class WorkerAgent:
                 attributes=attributes or {},
             )
         )
+        # Mirror to OpenTelemetry when configured (live Dynatrace tenant).
+        # Lazy-import so sim-mode runs with zero OTel dependencies, and any
+        # OTel error is swallowed so the supervisory loop never blocks on it.
+        try:
+            from ..telemetry import otel
+            if otel.is_enabled():
+                otel.record_event(event, agent_state=self.state, scenario=self.scenario)
+        except Exception:
+            pass
+        return event

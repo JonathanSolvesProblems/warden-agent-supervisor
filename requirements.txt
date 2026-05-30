@@ -18,6 +18,8 @@ google-adk>=1.0          # canonical Agent Builder / ADK path (see docs/DEPLOY.m
 google-genai>=1.0        # Gemini 3 structured reasoning (warden/supervisor/gemini_brain.py)
 mcp>=1.2                 # Model Context Protocol client -> Dynatrace MCP server (needs Node 22.10+)
 
-# LIVE mode — agent self-instrumentation shipped to Dynatrace (OpenTelemetry)
-opentelemetry-sdk>=1.27
-opentelemetry-exporter-otlp>=1.27
+# LIVE mode: agent self-instrumentation shipped to Dynatrace via OTLP/HTTP.
+# Dynatrace SaaS rejects gRPC; only the HTTP/protobuf exporter is supported.
+opentelemetry-api>=1.42
+opentelemetry-sdk>=1.42
+opentelemetry-exporter-otlp-proto-http>=1.42
