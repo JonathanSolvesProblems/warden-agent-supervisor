@@ -1,4 +1,4 @@
-"""GeminiBrain: Warden's reasoning powered by Gemini 3 (the required model).
+"""GeminiBrain: Warden's reasoning powered by Gemini via Google Cloud Agent Builder.
 
 Design choice that matters: Gemini supplies *judgment* (failure class, severity,
 recommended action, plain-language summary) while the **dollar figures and
