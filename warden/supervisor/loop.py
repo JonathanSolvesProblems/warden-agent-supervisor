@@ -77,8 +77,8 @@ class Warden:
         problems = self.dt.list_problems()
         # In live mode the tenant returns problems about every monitored entity.
         # Warden only supervises *its* fleet, so anything else is ignored. This
-        # keeps the operator console silent until our fleet itself emits a
-        # signal Dynatrace flags.
+        # keeps the operator console silent until the supervised fleet itself
+        # emits a signal Dynatrace flags.
         fleet_agents = set(self.fleet.agents.keys())
         in_scope = [p for p in problems
                     if p.get("affectedEntity") in fleet_agents]

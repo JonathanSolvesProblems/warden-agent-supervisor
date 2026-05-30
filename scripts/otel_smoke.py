@@ -8,7 +8,7 @@ Success criteria (per Dynatrace docs):
 3. A DQL `fetch spans` query through the MCP server returns at least one
    warden span.
 
-We deliberately do NOT verify by polling `list_problems()`. Davis AI needs at
+The smoke test deliberately does NOT poll `list_problems()`. Davis AI needs at
 least 5 minutes of 1-minute samples plus a configured Metric event before a
 problem fires. A short smoke run cannot satisfy that, so an empty
 `list_problems` result would be misleading rather than informative.

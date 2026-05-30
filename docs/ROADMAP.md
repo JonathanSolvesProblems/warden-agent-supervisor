@@ -21,7 +21,7 @@ Status of the Warden build for the Google Cloud Rapid Agent Hackathon.
 ## Next: to harden for submission
 
 - [x] Validate LIVE Dynatrace MCP handshake (20 tools enumerated, `list_problems`/`execute_dql`/Davis Copilot return live data, see `scripts/live_check.py`).
-- [ ] Push worker-agent OpenTelemetry signals into Dynatrace so live demos read our own fleet data.
+- [ ] Push worker-agent OpenTelemetry signals into Dynatrace so live demos read the fleet's own data.
 - [ ] Confirm Gemini brain end-to-end (needs `GOOGLE_CLOUD_PROJECT` configured).
 - [ ] Deploy the canonical ADK `LlmAgent` + `McpToolset` (docs/DEPLOY.md §3) to Agent Runtime.
 - [ ] Instrument Warden itself with OpenTelemetry → Dynatrace (self-observability).
