@@ -89,8 +89,19 @@ def init_otel(service_name: str = "warden", namespace: str = "warden.fleet") -> 
             from opentelemetry import metrics, trace
             from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-            from opentelemetry.sdk.metrics import MeterProvider
-            from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+            from opentelemetry.sdk.metrics import (
+                Counter,
+                Histogram,
+                MeterProvider,
+                ObservableCounter,
+                ObservableGauge,
+                ObservableUpDownCounter,
+                UpDownCounter,
+            )
+            from opentelemetry.sdk.metrics.export import (
+                AggregationTemporality,
+                PeriodicExportingMetricReader,
+            )
             from opentelemetry.sdk.resources import Resource
             from opentelemetry.sdk.trace import TracerProvider
             from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -124,7 +135,22 @@ def init_otel(service_name: str = "warden", namespace: str = "warden.fleet") -> 
         trace.set_tracer_provider(tp)
         _TRACER = trace.get_tracer("warden.fleet")
 
-        metric_exporter = OTLPMetricExporter(endpoint=f"{endpoint}/v1/metrics", headers=headers)
+        # Dynatrace's OTLP metrics ingest only accepts DELTA temporality; the OTel SDK
+        # defaults to CUMULATIVE for Counter / Histogram, which Dynatrace rejects with
+        # 400 Bad Request. Set the preference explicitly per instrument type.
+        dt_temporality = {
+            Counter: AggregationTemporality.DELTA,
+            UpDownCounter: AggregationTemporality.DELTA,
+            Histogram: AggregationTemporality.DELTA,
+            ObservableCounter: AggregationTemporality.DELTA,
+            ObservableUpDownCounter: AggregationTemporality.DELTA,
+            ObservableGauge: AggregationTemporality.DELTA,
+        }
+        metric_exporter = OTLPMetricExporter(
+            endpoint=f"{endpoint}/v1/metrics",
+            headers=headers,
+            preferred_temporality=dt_temporality,
+        )
         reader = PeriodicExportingMetricReader(metric_exporter, export_interval_millis=10000)
         mp = MeterProvider(resource=resource, metric_readers=[reader])
         metrics.set_meter_provider(mp)
