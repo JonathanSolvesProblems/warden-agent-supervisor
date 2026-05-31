@@ -37,6 +37,11 @@ def _resolve_endpoint() -> str | None:
     base = os.getenv("DT_ENVIRONMENT", "").strip().rstrip("/")
     if not base:
         return None
+    # The OTLP gateway lives on the classic `.live.dynatrace.com` host even when
+    # the Platform UI lives on `.apps.dynatrace.com`. Translate transparently so
+    # users can keep using their UI URL in DT_ENVIRONMENT.
+    if ".apps.dynatrace.com" in base:
+        base = base.replace(".apps.dynatrace.com", ".live.dynatrace.com")
     return f"{base}/api/v2/otlp"
 
 
@@ -79,6 +84,8 @@ def init_otel(service_name: str = "warden", namespace: str = "warden.fleet") -> 
             return False
 
         try:
+            import logging
+
             from opentelemetry import metrics, trace
             from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -90,6 +97,16 @@ def init_otel(service_name: str = "warden", namespace: str = "warden.fleet") -> 
         except ImportError as exc:
             print(f"[warden.otel] opentelemetry packages not installed ({exc}); export disabled.")
             return False
+
+        # Make OTel exporter errors (especially 401 on wrong token / scope) visible
+        # on stderr so a bad token is not silently swallowed.
+        if not logging.getLogger().handlers:
+            logging.basicConfig(level=logging.WARNING)
+        for name in (
+            "opentelemetry.exporter.otlp.proto.http.trace_exporter",
+            "opentelemetry.exporter.otlp.proto.http.metric_exporter",
+        ):
+            logging.getLogger(name).setLevel(logging.WARNING)
 
         resource = Resource.create({
             "service.name": service_name,

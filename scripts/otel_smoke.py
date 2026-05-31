@@ -43,8 +43,11 @@ def main() -> int:
         print(f"WARDEN_MODE is '{config.mode()}'. Set WARDEN_MODE=live in .env to run this check.")
         return 1
     if not otel.init_otel():
-        print("OTel init failed. Set DT_API_TOKEN (classic) or DT_OTEL_BEARER / DT_PLATFORM_TOKEN")
-        print("with the openTelemetryTrace.ingest + metrics.ingest scopes.")
+        print("OTel init failed. The OTLP gateway needs a CLASSIC Dynatrace API access token")
+        print("(NOT a Personal Platform token) with these scopes:")
+        print("  openTelemetryTrace.ingest, metrics.ingest, logs.ingest")
+        print("Generate at: https://<tenant>.live.dynatrace.com/ui/apps/dynatrace.classic.tokens")
+        print("Then set DT_API_TOKEN=dt0c01.<rest> in .env.")
         return 1
 
     print()
