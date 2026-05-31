@@ -43,11 +43,18 @@ def main() -> int:
         print(f"WARDEN_MODE is '{config.mode()}'. Set WARDEN_MODE=live in .env to run this check.")
         return 1
     if not otel.init_otel():
-        print("OTel init failed. The OTLP gateway needs a CLASSIC Dynatrace API access token")
-        print("(NOT a Personal Platform token) with these scopes:")
-        print("  openTelemetryTrace.ingest, metrics.ingest, logs.ingest")
-        print("Generate at: https://<tenant>.live.dynatrace.com/ui/apps/dynatrace.classic.tokens")
-        print("Then set DT_API_TOKEN=dt0c01.<rest> in .env.")
+        print()
+        print("OTel init failed. The line above shows the specific cause; common ones:")
+        print()
+        print("  - 'opentelemetry packages not installed' -> pip install opentelemetry-api")
+        print("    opentelemetry-sdk opentelemetry-exporter-otlp-proto-http")
+        print()
+        print("  - 'missing DT_ENVIRONMENT or DT_API_TOKEN ...' -> generate a CLASSIC Access")
+        print("    Token (dt0c01.*) via Ctrl+K in your Dynatrace UI -> 'Access Tokens' app,")
+        print("    using the 'Kubernetes: Data Ingest' template (or manually add the scopes")
+        print("    openTelemetryTrace.ingest, metrics.ingest, logs.ingest), then set")
+        print("    DT_API_TOKEN=dt0c01.<rest> in .env. Direct link:")
+        print("    https://<tenant>.apps.dynatrace.com/ui/apps/dynatrace.classic.tokens")
         return 1
 
     print()
