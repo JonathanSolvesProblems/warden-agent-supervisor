@@ -54,7 +54,10 @@ let LATEST_INCIDENTS = [];
 function renderMetrics(summary) {
   $("m-incidents").textContent = summary.incidents;
   $("m-mttd").textContent = summary.avg_mttd_ticks == null ? "n/a" : summary.avg_mttd_ticks + " ticks";
-  $("m-recovered").textContent = money(summary.dollars_recovered);
+  const recEl = $("m-recovered");
+  const recovered = Number(summary.dollars_recovered || 0);
+  recEl.textContent = money(recovered);
+  recEl.classList.toggle("has-value", recovered > 0); // warm gold when > 0
   $("m-loss").textContent = money(summary.irreversible_loss);
   $("m-prevented").textContent = money(summary.projected_loss_prevented);
 }
@@ -63,9 +66,19 @@ function renderIncidents(incidents) {
   LATEST_INCIDENTS = incidents || [];
   const el = $("incidents");
   el.innerHTML = "";
-  if (!incidents.length) { el.innerHTML = `<p class="dim">No incidents yet. Inject a scenario to watch Warden respond.</p>`; return; }
+  if (!incidents.length) {
+    el.innerHTML = `
+      <div class="incidents-empty">
+        <p><span class="arrow">&larr;</span> Inject a scenario to watch Warden catch a rogue agent in real time.</p>
+      </div>`;
+    return;
+  }
   incidents.slice().reverse().forEach((i) => {
-    const approved = i.human_approval_required
+    const isGated = i.human_approval_required;
+    const pill = isGated
+      ? `<span class="pill gated">HUMAN-GATED</span>`
+      : `<span class="pill autonomous">AUTONOMOUS</span>`;
+    const approved = isGated
       ? (i.human_approved ? `<span class="ok">approved</span>` : `<span class="no">denied/pending</span>`)
       : "n/a (autonomous)";
     const mttd = i.mttd_ticks == null ? "n/a" : i.mttd_ticks + " ticks";
@@ -73,12 +86,15 @@ function renderIncidents(incidents) {
     card.className = "incident clickable";
     card.title = "Click for full diagnosis, plan, and actions";
     card.innerHTML = `
-      <div class="ihead"><span>${i.incident_id} · ${i.suspect_agent}</span><span>sev ${i.diagnosis.severity}</span></div>
+      <div class="ihead">
+        <span>${i.incident_id} &middot; ${i.suspect_agent}${pill}</span>
+        <span>sev ${i.diagnosis.severity}</span>
+      </div>
       <div class="imeta">
         ${i.diagnosis.failure_class}<br/>
         MTTD: ${mttd}, reasoned by ${i.diagnosis.reasoned_by}<br/>
         human approval: ${approved}<br/>
-        <span class="ok">recovered ${money(i.dollars_recovered)}</span> ·
+        <span class="ok">recovered ${money(i.dollars_recovered)}</span> &middot;
         <span class="no">lost ${money(i.irreversible_loss_at_detection)}</span><br/>
         prevented (est.) ${money(i.projected_loss_prevented)}
       </div>`;
@@ -126,6 +142,14 @@ function openIncident(id) {
 function closeIncident() { $("modal").classList.add("hidden"); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+function pulseBrand() {
+  const mark = document.querySelector(".brandmark");
+  if (!mark) return;
+  mark.classList.remove("pulse");
+  void mark.offsetWidth;            // restart the animation if it's already running
+  mark.classList.add("pulse");
+}
+
 function showApproval(detail) {
   $("approval-detail").textContent = detail || "";
   $("approval-banner").classList.remove("hidden");
@@ -156,7 +180,10 @@ function handleEvent(msg) {
       break;
     case "sense": {
       const n = (payload.problems || []).filter(p => !(payload.handled || []).includes(p.affectedEntity));
-      if (n.length) feedLine("sense", `Dynatrace flags: ${n.map(p => p.title).join("; ")}`);
+      if (n.length) {
+        feedLine("sense", `Dynatrace flags: ${n.map(p => p.title).join("; ")}`);
+        pulseBrand();
+      }
       break;
     }
     case "diagnose": {
