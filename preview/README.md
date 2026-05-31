@@ -11,8 +11,8 @@ Save each image into this folder with the canonical filename so the demo-video s
 | `warden-metrics-by-agent.png` | Notebooks DQL chart: `timeseries actions = sum(warden.agent.actions), by: { agent.id }`, three colored series (inventory-agent / pricing-agent / refund-agent) | Around 1:40, when claiming "measured per agent, not just totals" |
 
 Also reasonable additions if captured later:
-- `warden-dashboard-incident.png` — Warden's own operator console with an open INCIDENT modal
-- `warden-davis-copilot.png` — Davis Copilot's response in `live_check` (terminal capture is fine)
-- `warden-gemini-diagnosis.png` — the Gemini brain's structured Diagnosis output from `live_check`
+- `warden-dashboard-incident.png`: Warden's own operator console with an open INCIDENT modal.
+- `warden-davis-copilot.png`: Davis Copilot's response in `live_check` (terminal capture is fine).
+- `warden-gemini-diagnosis.png`: the Gemini brain's structured Diagnosis output from `live_check`.
 
 These screenshots are kept in the public repo so judges browsing GitHub can verify the integration immediately without running anything.

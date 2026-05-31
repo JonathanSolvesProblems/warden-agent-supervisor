@@ -28,3 +28,6 @@ Thumbs.db
 *.log
 warden_runs/
 *.sqlite3
+
+# Local-only Devpost submission paste guide
+SUBMISSION.md
