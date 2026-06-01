@@ -138,13 +138,24 @@ Cloud Run / Agent Runtime deployment.
 
 ## Status
 
-Core is complete and runs offline. The CLI demo, the web dashboard, and the test
-suite are all verified. The **live Dynatrace MCP handshake is now verified**
-against a real tenant: 20 tools enumerated, `list_problems`, `execute_dql`, and
-`chat_with_davis_copilot` all return live data (`python -m scripts.live_check`).
-Still pending: wiring the worker-agent fleet's OpenTelemetry exporter to push
-real telemetry into Dynatrace, plus Cloud Run deploy. See
-[docs/ROADMAP.md](docs/ROADMAP.md).
+Every layer of the live stack is verified end-to-end against a real Dynatrace
+tenant. Both data planes are real:
+
+- **Live Dynatrace MCP**: 20 tools enumerated, `list_problems`, `execute_dql`,
+  `chat_with_davis_copilot` all return live data (`scripts/live_check.py`).
+- **Live Gemini diagnosis**: structured `Diagnosis` returned in 2 seconds on a
+  synthetic Dynatrace problem (failure_class, severity, recommended_action,
+  blast_radius_usd, confidence).
+- **Live OpenTelemetry push to Dynatrace**: 808+ `agent.action` and
+  `agent.error` spans visible in Distributed Tracing under
+  `service.name = warden`, plus `warden.agent.actions`, `warden.agent.errors`,
+  `warden.agent.latency_ms`, `warden.agent.cost_usd`, `warden.agent.value_usd`
+  metrics broken down by `agent.id` (`scripts/otel_smoke.py`).
+- **Benchmark**: 100% detection across 3 scenarios, 0% false-positive on 30
+  healthy episodes, 1-tick median MTTD.
+
+Pending: Cloud Run deploy of the operator console for the hosted-URL
+submission and the demo video. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 

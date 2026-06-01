@@ -129,8 +129,10 @@ class QuietServer(ThreadingHTTPServer):
 
 
 def main() -> None:
-    host = os.getenv("WARDEN_WEB_HOST", "127.0.0.1")
-    port = int(os.getenv("WARDEN_WEB_PORT", "8080"))
+    # Cloud Run sets PORT and expects the container to bind 0.0.0.0; honor those
+    # defaults so the same image runs locally and on Cloud Run with no env tweaks.
+    host = os.getenv("WARDEN_WEB_HOST", "0.0.0.0")
+    port = int(os.getenv("WARDEN_WEB_PORT", os.getenv("PORT", "8080")))
     RUNNER.start()
     print(f"Warden dashboard [mode: {config.mode()}] -> http://{host}:{port}")
     server = QuietServer((host, port), Handler)
