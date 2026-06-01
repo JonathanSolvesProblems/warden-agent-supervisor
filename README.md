@@ -1,10 +1,20 @@
 # Warden: the agent that governs your agents
 
-Warden is an autonomous agent-reliability supervisor. It uses Gemini (via the
-`gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud Agent Builder
-/ Vertex) and watches a fleet of production AI agents through the Dynatrace MCP
-server. When one agent goes rogue, Warden catches it, diagnoses it, and contains it
-under human oversight before it does more damage.
+Warden is an autonomous agent-reliability supervisor built on **Gemini 3**
+(via the `gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud
+Agent Builder / Vertex) and the **Dynatrace MCP server**. It watches a fleet
+of production AI agents, and when one goes rogue, Warden catches it, diagnoses
+it, and contains it under human oversight before it does more damage.
+
+## How Warden meets the hackathon's "Build Your Agent" criteria
+
+| Requirement | How Warden satisfies it | File |
+|---|---|---|
+| Built with **Gemini 3** | `gemini-flash-latest` and `gemini-pro-latest` aliases resolve to Gemini 3 family models. Verified at runtime against the live tenant (the API returned `model: gemini-3.1-pro` during testing). | `warden/config.py`, `warden/supervisor/gemini_brain.py` |
+| Using **Google Cloud Agent Builder** | Canonical ADK `LlmAgent` + `McpToolset` wiring lives in code as the production deploy target for Agent Runtime / Agent Engine. The supervisor loop also calls Gemini via the `google-genai` SDK on the same Vertex / Agent Builder surface (code-first instead of low-code), with `tool_filter` enforcing least privilege on the four MCP tools Warden invokes. | `warden/adk_agent.py`, `docs/DEPLOY.md` |
+| Integrate the partner's **MCP server** | Dynatrace MCP server (`@dynatrace-oss/dynatrace-mcp-server`) is Warden's only sense organ. 20 tools enumerated live, `list_problems`, `execute_dql`, and `chat_with_davis_copilot` all verified end-to-end against the tenant. | `warden/dynatrace/mcp_client.py` |
+| Move beyond chat (use tools, take action) | Pause, rollback, alert, and Dynatrace workflow creation are real actions executed behind a human-approval gate, not just answers. | `warden/supervisor/interventions.py`, `warden/supervisor/policies.py` |
+| Multi-step mission with human in control | Sense -> reason -> decide -> act -> prove, with a real blocking gate for irreversible / high-blast-radius actions. | `warden/supervisor/loop.py` |
 
 Submission for the Google Cloud Rapid Agent Hackathon (Dynatrace track).
 

@@ -36,34 +36,24 @@ WARDEN_MODE=live python -m scripts.demo --ticks 20
 > `list_tools()` and adjust `warden/dynatrace/mcp_client.py` if your server
 > version differs.
 
-## 3. The canonical Agent Builder / ADK pattern (for judges)
+## 3. The canonical Agent Builder / ADK pattern
 
-Warden uses an explicit governance loop (deterministic safety + human-in-the-loop)
-with Gemini for judgment. The same Dynatrace MCP server is what an ADK `LlmAgent`
-consumes natively. Include this in the submission to show the blessed path:
+Warden ships this as a real code artifact, not a docs snippet: see
+[`warden/adk_agent.py`](../warden/adk_agent.py). That file defines an ADK
+`LlmAgent` powered by Gemini 3 (via `gemini-flash-latest`), wired to the
+Dynatrace MCP server via `McpToolset` with a `tool_filter` enforcing least
+privilege on the four tools Warden actually invokes. It is the deployment
+target for Agent Runtime / Agent Engine. To build the agent:
 
 ```python
-from google.adk.agents import LlmAgent
-from google.adk.tools.mcp_tool import McpToolset
-from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
-from mcp import StdioServerParameters
+from warden.adk_agent import build_warden_agent
 
-warden_agent = LlmAgent(
-    model="gemini-flash-latest",            # Flash for the high-frequency monitoring loop
-    name="warden",
-    instruction="Supervise the agent fleet; contain rogue agents under human oversight.",
-    tools=[McpToolset(
-        connection_params=StdioConnectionParams(
-            server_params=StdioServerParameters(
-                command="npx",
-                args=["-y", "@dynatrace-oss/dynatrace-mcp-server@latest"],
-                env={"DT_ENVIRONMENT": "...", "DT_PLATFORM_TOKEN": "..."},
-            )),
-        tool_filter=["list_problems", "execute_dql",
-                     "chat_with_davis_copilot", "create_workflow_for_notification"],
-    )],
-)
+agent = build_warden_agent()
 ```
+
+The supervisory loop in `warden/supervisor/loop.py` is the deterministic
+governance harness that runs in the demo today; both entry points use the
+same Gemini 3 family models and the same Dynatrace MCP server.
 
 ## 4. Deploy to Google Cloud
 
