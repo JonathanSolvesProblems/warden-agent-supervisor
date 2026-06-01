@@ -13,7 +13,7 @@ Google Cloud.
   (`storage:*:read`, `automation:workflows:read`, `davis-copilot:conversations:execute`,
   `email:emails:send`, …).
 - **Node v22.10+** (the Dynatrace MCP server runs via `npx`).
-- Python 3.12 or 3.13 (Google ADK targets 3.10–3.13; use a venv if your host is 3.14).
+- Python 3.12 or 3.13 (Google ADK targets 3.10 to 3.13; use a venv if your host is 3.14).
 
 ## 2. Configure
 
