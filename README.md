@@ -1,5 +1,8 @@
 # Warden: the agent that governs your agents
 
+**Live demo (Cloud Run, sim mode, no login required):**
+**https://warden-qfobjfyspq-uc.a.run.app**
+
 Warden is an autonomous agent-reliability supervisor built on **Gemini 3**
 (via the `gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud
 Agent Builder / Vertex) and the **Dynatrace MCP server**. It watches a fleet
