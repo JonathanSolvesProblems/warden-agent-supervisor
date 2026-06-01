@@ -37,9 +37,15 @@ warden_audit.log
 # Things the dashboard does not need at runtime.
 tests/
 docs/
-preview/
 scripts/
 SUBMISSION.md
+VIDEO.md
+COVER.md
 README.md
 Dockerfile
 .dockerignore
+
+# preview/ ships at runtime so the Live Evidence tab can serve cover.png and
+# the Dynatrace screenshots from /preview/<file>. Keep the dev-only fonts out.
+preview/.fonts/
+preview/README.md

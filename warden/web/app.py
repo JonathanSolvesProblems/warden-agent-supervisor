@@ -4,9 +4,12 @@
 
 Routes
     GET  /                 dashboard page
+    GET  /health           plain 200 for Cloud Run health probes
     GET  /static/<file>    static assets
+    GET  /preview/<file>   evidence assets (Dynatrace screenshots, cover image)
     GET  /events           Server-Sent Events stream of Warden's reasoning
     GET  /api/state        snapshot (fleet, incidents, ledger, pending approval)
+    GET  /api/evidence     manifest of which preview assets are available
     POST /api/inject       {"scenario": "..."} inject a rogue scenario
     POST /api/decision     {"approved": true|false} answer a human-in-the-loop gate
     POST /api/reset        rebuild a fresh fleet
@@ -23,10 +26,43 @@ from .. import config
 from .runner import SimRunner
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+PREVIEW_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "preview"))
 RUNNER = SimRunner()
 
 _CONTENT_TYPES = {".html": "text/html", ".js": "application/javascript",
-                  ".css": "text/css", ".svg": "image/svg+xml"}
+                  ".css": "text/css", ".svg": "image/svg+xml",
+                  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                  ".webp": "image/webp", ".mp4": "video/mp4"}
+
+EVIDENCE = [
+    {
+        "id": "spans-list",
+        "file": "warden-spans-list-808.png",
+        "title": "808 OpenTelemetry spans in Dynatrace",
+        "caption": (
+            "Distributed Tracing view, filtered to service.name = warden. "
+            "Every span here came out of Warden's worker fleet via OTLP/HTTP."
+        ),
+    },
+    {
+        "id": "span-detail",
+        "file": "warden-span-detail.png",
+        "title": "Per-span structured attributes",
+        "caption": (
+            "service.name = warden, service.namespace = warden.fleet, "
+            "agent.id on the span. Exactly the attributes the supervisor reasons over."
+        ),
+    },
+    {
+        "id": "metrics-by-agent",
+        "file": "warden-metrics-by-agent.png",
+        "title": "Per-agent metrics in Dynatrace Notebooks",
+        "caption": (
+            "warden.agent.actions broken down by agent.id. Three series for "
+            "refund-agent, pricing-agent, inventory-agent. Ready for Davis to baseline."
+        ),
+    },
+]
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -71,10 +107,19 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/":
             self._send_file(os.path.join(STATIC_DIR, "index.html"))
+        elif path == "/health":
+            self._send_json({"status": "ok", "mode": config.mode()})
         elif path.startswith("/static/"):
             self._send_file(os.path.join(STATIC_DIR, os.path.basename(path)))
+        elif path.startswith("/preview/"):
+            self._send_file(os.path.join(PREVIEW_DIR, os.path.basename(path)))
         elif path == "/api/state":
             self._send_json(RUNNER.snapshot())
+        elif path == "/api/evidence":
+            self._send_json({"items": [
+                {**item, "available": os.path.isfile(os.path.join(PREVIEW_DIR, item["file"]))}
+                for item in EVIDENCE
+            ]})
         elif path == "/events":
             self._stream_events()
         else:

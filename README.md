@@ -1,7 +1,15 @@
 # Warden: the agent that governs your agents
 
+![Warden cover](preview/cover.png)
+
 **Live demo (Cloud Run, sim mode, no login required):**
 **https://warden-qfobjfyspq-uc.a.run.app**
+
+The hosted dashboard has two tabs: **Operator console** (live reasoning, fleet
+state, scenario injectors, human-gated approvals, incident audit trails) and
+**Live Evidence** (screenshots of real OpenTelemetry traces and per-agent metrics
+landing in a Dynatrace tenant, with the DQL queries and span attributes
+documented inline).
 
 Warden is an autonomous agent-reliability supervisor built on **Gemini 3**
 (via the `gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud
@@ -157,8 +165,7 @@ tenant. Both data planes are real:
 - **Benchmark**: 100% detection across 3 scenarios, 0% false-positive on 30
   healthy episodes, 1-tick median MTTD.
 
-Pending: Cloud Run deploy of the operator console for the hosted-URL
-submission and the demo video. See [docs/ROADMAP.md](docs/ROADMAP.md).
+Pending: demo video upload. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 

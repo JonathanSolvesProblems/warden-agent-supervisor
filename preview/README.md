@@ -16,3 +16,11 @@ Also reasonable additions if captured later:
 - `warden-gemini-diagnosis.png`: the Gemini brain's structured Diagnosis output from `live_check`.
 
 These screenshots are kept in the public repo so judges browsing GitHub can verify the integration immediately without running anything.
+
+The same screenshots also power the dashboard's **Live Evidence** tab. Drop any of the canonical filenames above into this folder and they activate automatically on the hosted URL at `/preview/<filename>`; the rest stay rendered as styled placeholder cards.
+
+The Devpost gallery cover is also generated into this folder as `cover.png`. Regenerate it from the JetBrains Mono fonts in `preview/.fonts/` with:
+
+```bash
+python -m scripts.generate_cover
+```

@@ -11,6 +11,10 @@ WORKDIR /app
 
 # Copy only what the web dashboard needs.
 COPY warden ./warden
+# preview/ holds cover.png + the Dynatrace screenshots the Live Evidence tab
+# serves from /preview/<file>. Optional: if any image is missing, the tab
+# renders a styled placeholder instead so a partial folder is fine.
+COPY preview ./preview
 
 # Cloud Run injects PORT at runtime; the app picks it up via PORT env (see
 # warden/web/app.py). Bind 0.0.0.0 so the container is reachable from outside.

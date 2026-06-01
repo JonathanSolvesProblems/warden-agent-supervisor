@@ -248,6 +248,59 @@ $("modal-close").onclick = closeIncident;
 $("modal").onclick = (e) => { if (e.target.id === "modal") closeIncident(); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeIncident(); });
 
+const EVIDENCE_TAGS = {
+  "spans-list":       ["DQL: fetch spans | summarize count()", "Distributed Tracing UI", "service.name = warden"],
+  "span-detail":      ["span attribute inspector", "agent.id, service.namespace, span.name"],
+  "metrics-by-agent": ["Dynatrace Notebooks", "warden.agent.actions by agent.id"],
+};
+
+function renderEvidence(items) {
+  const grid = $("evidence-grid");
+  grid.innerHTML = "";
+  items.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "evidence-card";
+    const tags = (EVIDENCE_TAGS[item.id] || []).map(t => `<span>${escapeHtml(t)}</span>`).join("");
+    const frame = item.available
+      ? `<img src="/preview/${item.file}" alt="${escapeHtml(item.title)}" loading="lazy" />`
+      : `<div class="placeholder">
+           <strong>${escapeHtml(item.title)}</strong>
+           waiting on <code>preview/${escapeHtml(item.file)}</code><br/>
+           drop the screenshot here and reload to activate this card
+         </div>`;
+    card.innerHTML = `
+      <h3>${escapeHtml(item.title)}</h3>
+      <div class="frame">${frame}</div>
+      <p class="caption">${escapeHtml(item.caption)}</p>
+      <div class="tags">${tags}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+async function loadEvidence() {
+  try {
+    const r = await fetch("/api/evidence");
+    const data = await r.json();
+    renderEvidence(data.items || []);
+  } catch (_) {
+    $("evidence-grid").innerHTML = `<div class="dim" style="padding:0 22px">evidence manifest unavailable</div>`;
+  }
+}
+
+function selectTab(which) {
+  const isConsole = which === "console";
+  $("tab-console").classList.toggle("active", isConsole);
+  $("tab-evidence").classList.toggle("active", !isConsole);
+  $("tab-console").setAttribute("aria-selected", String(isConsole));
+  $("tab-evidence").setAttribute("aria-selected", String(!isConsole));
+  $("view-console").hidden = !isConsole;
+  $("view-evidence").hidden = isConsole;
+  if (!isConsole) loadEvidence();
+}
+
+$("tab-console").onclick = () => selectTab("console");
+$("tab-evidence").onclick = () => selectTab("evidence");
+
 (async function init() {
   const s = await (await fetch("/api/state")).json();
   $("mode-badge").textContent = "mode: " + (s.mode || "sim");

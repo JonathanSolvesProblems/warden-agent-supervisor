@@ -29,43 +29,69 @@
     </div>
   </header>
 
-  <section id="approval-banner" class="approval hidden">
-    <div class="approval-text">
-      <strong>Human-in-the-loop required.</strong>
-      <span id="approval-detail"></span>
-    </div>
-    <div class="approval-actions">
-      <button id="approve-btn" class="btn approve">Approve</button>
-      <button id="deny-btn" class="btn deny">Deny</button>
-    </div>
-  </section>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" id="tab-console" role="tab" aria-selected="true" aria-controls="view-console">Operator console</button>
+    <button class="tab" id="tab-evidence" role="tab" aria-selected="false" aria-controls="view-evidence">Live Evidence (Dynatrace)</button>
+  </nav>
 
-  <section class="metrics" id="metrics">
-    <div class="metric"><span class="m-label">Incidents</span><span class="m-value" id="m-incidents">0</span></div>
-    <div class="metric"><span class="m-label">Avg time-to-detect</span><span class="m-value" id="m-mttd">n/a</span></div>
-    <div class="metric good"><span class="m-label">$ recovered (hard)</span><span class="m-value" id="m-recovered">$0</span></div>
-    <div class="metric bad"><span class="m-label">$ irreversible loss</span><span class="m-value" id="m-loss">$0</span></div>
-    <div class="metric"><span class="m-label">$ loss prevented (est.)</span><span class="m-value" id="m-prevented">$0</span></div>
-  </section>
-
-  <main class="grid">
-    <aside class="panel">
-      <h2><span class="section-num">01 /</span> Fleet</h2>
-      <div id="fleet" class="fleet"></div>
-      <h2><span class="section-num">02 /</span> Inject a rogue scenario</h2>
-      <div id="scenarios" class="scenarios"></div>
-    </aside>
-
-    <section class="panel feed-panel">
-      <h2><span class="section-num">03 /</span> Warden live reasoning <span class="dim">(via Dynatrace MCP)</span></h2>
-      <div id="feed" class="feed"></div>
+  <div id="view-console" role="tabpanel" aria-labelledby="tab-console">
+    <section id="approval-banner" class="approval hidden">
+      <div class="approval-text">
+        <strong>Human-in-the-loop required.</strong>
+        <span id="approval-detail"></span>
+      </div>
+      <div class="approval-actions">
+        <button id="approve-btn" class="btn approve">Approve</button>
+        <button id="deny-btn" class="btn deny">Deny</button>
+      </div>
     </section>
 
-    <aside class="panel">
-      <h2><span class="section-num">04 /</span> Incidents</h2>
-      <div id="incidents" class="incidents"></div>
-    </aside>
-  </main>
+    <section class="metrics" id="metrics">
+      <div class="metric"><span class="m-label">Incidents</span><span class="m-value" id="m-incidents">0</span></div>
+      <div class="metric"><span class="m-label">Avg time-to-detect</span><span class="m-value" id="m-mttd">n/a</span></div>
+      <div class="metric good"><span class="m-label">$ recovered (hard)</span><span class="m-value" id="m-recovered">$0</span></div>
+      <div class="metric bad"><span class="m-label">$ irreversible loss</span><span class="m-value" id="m-loss">$0</span></div>
+      <div class="metric"><span class="m-label">$ loss prevented (est.)</span><span class="m-value" id="m-prevented">$0</span></div>
+    </section>
+
+    <main class="grid">
+      <aside class="panel">
+        <h2><span class="section-num">01 /</span> Fleet</h2>
+        <div id="fleet" class="fleet"></div>
+        <h2><span class="section-num">02 /</span> Inject a rogue scenario</h2>
+        <div id="scenarios" class="scenarios"></div>
+      </aside>
+
+      <section class="panel feed-panel">
+        <h2><span class="section-num">03 /</span> Warden live reasoning <span class="dim">(via Dynatrace MCP)</span></h2>
+        <div id="feed" class="feed"></div>
+      </section>
+
+      <aside class="panel">
+        <h2><span class="section-num">04 /</span> Incidents</h2>
+        <div id="incidents" class="incidents"></div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <section class="evidence-intro panel">
+      <h2><span class="section-num">05 /</span> Real Dynatrace tenant evidence</h2>
+      <p class="dim">
+        The dashboard above runs in sim mode so the loop is deterministic and replayable.
+        The same code path also exports OpenTelemetry traces and metrics to a real Dynatrace
+        tenant. These are screenshots from that live tenant, not mocks. The DQL queries and
+        attribute schema are documented inline so the integration can be verified end-to-end.
+      </p>
+      <div class="evidence-meta">
+        <span class="badge">service.name = warden</span>
+        <span class="badge">service.namespace = warden.fleet</span>
+        <span class="badge">OTLP/HTTP -&gt; *.live.dynatrace.com</span>
+        <span class="badge">808+ spans verified</span>
+      </div>
+    </section>
+    <div id="evidence-grid" class="evidence-grid"></div>
+  </div>
 
   <div id="modal" class="modal hidden">
     <div class="modal-card">
