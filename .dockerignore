@@ -1,0 +1,45 @@
+# Never bake secrets or local dev artifacts into the image.
+.env
+.env.*
+*.local
+service-account*.json
+credentials*.json
+
+# Source-control + build noise.
+.git
+.gitignore
+.gitattributes
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS / editor.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Runtime artifacts.
+*.log
+warden_runs/
+*.sqlite3
+warden_audit.log
+
+# Things the dashboard does not need at runtime.
+tests/
+docs/
+preview/
+scripts/
+SUBMISSION.md
+README.md
+Dockerfile
+.dockerignore
