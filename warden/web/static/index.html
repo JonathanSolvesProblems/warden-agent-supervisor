@@ -78,16 +78,18 @@
     <section class="evidence-intro panel">
       <h2><span class="section-num">05 /</span> Real Dynatrace tenant evidence</h2>
       <p class="dim">
-        The dashboard above runs in sim mode so the loop is deterministic and replayable.
+        The operator console above runs in sim mode so the loop is deterministic and replayable.
         The same code path also exports OpenTelemetry traces and metrics to a real Dynatrace
-        tenant. These are screenshots from that live tenant, not mocks. The DQL queries and
-        attribute schema are documented inline so the integration can be verified end-to-end.
+        tenant via OTLP/HTTP. The captures below are screenshots from that live tenant
+        (<code>xwy37883.apps.dynatrace.com</code>), produced by <code>scripts/otel_smoke.py</code>
+        against the <code>@dynatrace-oss/dynatrace-mcp-server</code>. The DQL queries and span
+        attribute schema are documented inline on each card.
       </p>
       <div class="evidence-meta">
         <span class="badge">service.name = warden</span>
         <span class="badge">service.namespace = warden.fleet</span>
-        <span class="badge">OTLP/HTTP -&gt; *.live.dynatrace.com</span>
-        <span class="badge">808+ spans verified</span>
+        <span class="badge">OTLP/HTTP &rarr; *.live.dynatrace.com</span>
+        <span class="badge">DELTA temporality for metrics</span>
       </div>
     </section>
     <div id="evidence-grid" class="evidence-grid"></div>

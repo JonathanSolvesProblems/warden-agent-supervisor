@@ -106,6 +106,12 @@ function renderIncidents(incidents) {
 function openIncident(id) {
   const i = LATEST_INCIDENTS.find(x => x.incident_id === id);
   if (!i) return;
+  const card = document.querySelector(".modal-card");
+  if (card) {
+    card.setAttribute("role", "dialog");
+    card.setAttribute("aria-modal", "true");
+    card.setAttribute("aria-labelledby", "modal-title");
+  }
   const d = i.diagnosis;
   const planRows = (i.plan && i.plan.actions || []).map(a =>
     `<tr><td>${a.kind}${a.needs_approval ? ' <span class="no">(needs approval)</span>' : ''}</td><td>${escapeHtml(a.detail || '')}</td></tr>`
@@ -114,7 +120,7 @@ function openIncident(id) {
     `<tr><td>${a.action}</td><td>${a.agent || ''}</td><td>${a.ok === false ? '<span class="no">withheld</span>' : '<span class="ok">ok</span>'}</td><td>${escapeHtml(a.detail || '')}</td></tr>`
   ).join('');
   $("modal-body").innerHTML = `
-    <h2>${i.incident_id} on ${i.suspect_agent}</h2>
+    <h2 id="modal-title">${i.incident_id} on ${i.suspect_agent}</h2>
     <p class="dim">Detected at tick ${i.detect_tick}, onset tick ${i.onset_tick == null ? 'n/a' : i.onset_tick}, MTTD ${i.mttd_ticks == null ? 'n/a' : i.mttd_ticks + ' ticks'}, reasoned by ${d.reasoned_by}.</p>
     <h3>Diagnosis</h3>
     <table class="kv">
@@ -265,8 +271,8 @@ function renderEvidence(items) {
       ? `<img src="/preview/${item.file}" alt="${escapeHtml(item.title)}" loading="lazy" />`
       : `<div class="placeholder">
            <strong>${escapeHtml(item.title)}</strong>
-           waiting on <code>preview/${escapeHtml(item.file)}</code><br/>
-           drop the screenshot here and reload to activate this card
+           live tenant capture pending<br/>
+           the loop ran end-to-end, the canonical screenshot lives outside the public repo
          </div>`;
     card.innerHTML = `
       <h3>${escapeHtml(item.title)}</h3>

@@ -38,7 +38,7 @@ h1, h2 { margin: 0; }
   35% { transform: scale(1.18); filter: drop-shadow(0 0 6px rgba(91, 140, 255, .7)); }
 }
 .brandmark.pulse { animation: brandpulse 0.75s ease; }
-.brand h1 { font-family: var(--mono); font-size: 18px; letter-spacing: 4px; font-weight: 700; }
+.brand h1 { font-family: var(--mono); font-size: 22px; letter-spacing: 4px; font-weight: 700; line-height: 1.1; }
 .tagline { margin: 0; font-size: 12px; color: var(--dim); }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 
@@ -98,13 +98,13 @@ h1, h2 { margin: 0; }
   padding: 16px; min-height: 60vh;
 }
 .panel h2 {
-  display: flex; align-items: baseline; gap: 10px;
+  display: flex; align-items: baseline; gap: 8px;
   font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--text); margin-bottom: 14px;
+  color: var(--text); margin-bottom: 14px; line-height: 1.4;
 }
 .panel h2 .section-num {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
-  color: var(--accent); opacity: 0.7; letter-spacing: 1px;
+  color: var(--accent); opacity: 0.5; letter-spacing: 1px;
 }
 .panel h2 .dim { text-transform: none; letter-spacing: 0; font-size: 11px; }
 
@@ -264,5 +264,13 @@ h1, h2 { margin: 0; }
 @media (max-width: 1100px) {
   .grid { grid-template-columns: 1fr; }
   .metrics { grid-template-columns: repeat(2, 1fr); }
+  .metrics .metric:last-child { grid-column: span 2; }
   .evidence-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandmark.pulse { animation: none; }
+  .approval { animation: none; }
+  .agent.rogue { animation: none; }
+  .grid.resetting { transition: none; }
 }
