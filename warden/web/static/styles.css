@@ -48,6 +48,11 @@ h1, h2 { margin: 0; }
 }
 .badge.tick { color: var(--accent); font-variant-numeric: tabular-nums; font-family: var(--mono); }
 .badge { font-family: var(--mono); font-size: 11px; }
+.badge.loading { color: var(--dim); animation: badgepulse 1.4s ease-in-out infinite; }
+@keyframes badgepulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
 
 .btn {
   cursor: pointer; border: 1px solid var(--line); background: var(--panel-2);
@@ -205,6 +210,24 @@ h1, h2 { margin: 0; }
 .dim { color: var(--dim); }
 .hidden { display: none; }
 
+/* Skeleton placeholders shown during the brief window between page load and
+   first-state hydration. Server-rendered initial state usually beats this to
+   the screen; this is the belt-and-suspenders for slow connections / cold
+   starts so the operator console never paints blank. */
+.skeleton-row, .skeleton-btn, .feed-placeholder {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  animation: skel 1.6s ease-in-out infinite;
+}
+.skeleton-row { height: 56px; margin-bottom: 10px; }
+.skeleton-btn { height: 50px; margin-bottom: 8px; }
+.feed-placeholder { padding: 8px 12px; }
+@keyframes skel {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.7; }
+}
+
 /* Tabs */
 .tabs {
   display: flex; gap: 4px; padding: 14px 22px 0;
@@ -273,4 +296,5 @@ h1, h2 { margin: 0; }
   .approval { animation: none; }
   .agent.rogue { animation: none; }
   .grid.resetting { transition: none; }
+  .badge.loading, .skeleton-row, .skeleton-btn, .feed-placeholder { animation: none; opacity: 0.5; }
 }

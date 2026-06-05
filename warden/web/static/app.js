@@ -162,16 +162,25 @@ function showApproval(detail) {
 }
 function hideApproval() { $("approval-banner").classList.add("hidden"); }
 
-async function refreshState() {
-  const s = await (await fetch("/api/state")).json();
+function applyState(s) {
+  $("mode-badge").textContent = "mode: " + (s.mode || "sim");
+  $("mode-badge").classList.remove("loading");
   $("tick-badge").textContent = "tick " + s.tick;
+  $("tick-badge").classList.remove("loading");
   renderFleet(s.states);
   renderMetrics(s.summary);
   renderIncidents(s.incidents);
+  const placeholder = document.querySelector(".feed-placeholder");
+  if (placeholder) placeholder.remove();
   if (s.pending_approval) {
     const g = (s.pending_approval.gated || [])[0];
     showApproval(g ? g.detail : "Operator approval required.");
   } else { hideApproval(); }
+}
+
+async function refreshState() {
+  const s = await (await fetch("/api/state")).json();
+  applyState(s);
 }
 
 function handleEvent(msg) {
@@ -179,6 +188,8 @@ function handleEvent(msg) {
   switch (type) {
     case "tick":
       $("tick-badge").textContent = "tick " + payload.tick;
+      $("tick-badge").classList.remove("loading");
+      $("mode-badge").classList.remove("loading");
       renderFleet(payload.states);
       break;
     case "chaos":
@@ -308,9 +319,13 @@ $("tab-console").onclick = () => selectTab("console");
 $("tab-evidence").onclick = () => selectTab("evidence");
 
 (async function init() {
-  const s = await (await fetch("/api/state")).json();
-  $("mode-badge").textContent = "mode: " + (s.mode || "sim");
+  // window.__WARDEN_INITIAL__ is server-rendered into index.html so the
+  // operator console paints with live data on the very first frame.
+  // Only fall back to a network fetch when the inline snapshot is missing
+  // (e.g. when the static file is loaded directly without the server).
+  let s = window.__WARDEN_INITIAL__;
+  if (!s) s = await (await fetch("/api/state")).json();
   renderScenarios(s.scenarios);
-  await refreshState();
+  applyState(s);
   connect();
 })();

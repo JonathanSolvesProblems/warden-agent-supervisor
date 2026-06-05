@@ -93,6 +93,28 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_index(self) -> None:
+        """Serve index.html with the current Warden snapshot inlined.
+
+        Without this, a fresh page renders empty panels for the second or two
+        between DOMContentLoaded and the first fetch('/api/state'). With it,
+        the operator console has live data on the very first paint.
+        """
+        path = os.path.join(STATIC_DIR, "index.html")
+        with open(path, "rb") as fh:
+            html = fh.read()
+        snapshot = json.dumps(RUNNER.snapshot(), default=str)
+        # Defend against JSON containing '</' which would close the script tag.
+        snapshot = snapshot.replace("</", "<\\/")
+        payload = f'<script>window.__WARDEN_INITIAL__={snapshot};</script>'.encode("utf-8")
+        html = html.replace(b"<!--INITIAL_STATE-->", payload)
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(html)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(html)
+
     def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length", 0) or 0)
         if not length:
@@ -106,7 +128,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = self.path.split("?", 1)[0]
         if path == "/":
-            self._send_file(os.path.join(STATIC_DIR, "index.html"))
+            self._send_index()
         elif path == "/health":
             self._send_json({"status": "ok", "mode": config.mode()})
         elif path.startswith("/static/"):

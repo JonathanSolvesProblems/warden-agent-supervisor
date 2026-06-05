@@ -23,8 +23,8 @@
       </div>
     </div>
     <div class="topbar-right">
-      <span class="badge" id="mode-badge">mode: …</span>
-      <span class="badge tick" id="tick-badge">tick 0</span>
+      <span class="badge loading" id="mode-badge">mode: connecting</span>
+      <span class="badge tick loading" id="tick-badge">tick ...</span>
       <button id="reset-btn" class="btn ghost">Reset fleet</button>
     </div>
   </header>
@@ -57,19 +57,35 @@
     <main class="grid">
       <aside class="panel">
         <h2><span class="section-num">01 /</span> Fleet</h2>
-        <div id="fleet" class="fleet"></div>
+        <div id="fleet" class="fleet">
+          <div class="skeleton-row" aria-hidden="true"></div>
+          <div class="skeleton-row" aria-hidden="true"></div>
+          <div class="skeleton-row" aria-hidden="true"></div>
+        </div>
         <h2><span class="section-num">02 /</span> Inject a rogue scenario</h2>
-        <div id="scenarios" class="scenarios"></div>
+        <div id="scenarios" class="scenarios">
+          <div class="skeleton-btn" aria-hidden="true"></div>
+          <div class="skeleton-btn" aria-hidden="true"></div>
+          <div class="skeleton-btn" aria-hidden="true"></div>
+        </div>
       </aside>
 
       <section class="panel feed-panel">
         <h2><span class="section-num">03 /</span> Warden live reasoning <span class="dim">(via Dynatrace MCP)</span></h2>
-        <div id="feed" class="feed"></div>
+        <div id="feed" class="feed">
+          <div class="line dim feed-placeholder" aria-hidden="true">
+            <span class="tag">SUPERVISOR</span>connecting to the live event stream...
+          </div>
+        </div>
       </section>
 
       <aside class="panel">
         <h2><span class="section-num">04 /</span> Incidents</h2>
-        <div id="incidents" class="incidents"></div>
+        <div id="incidents" class="incidents">
+          <div class="incidents-empty" aria-hidden="true">
+            <p><span class="arrow">&middot;</span>connecting to Warden supervisor...</p>
+          </div>
+        </div>
       </aside>
     </main>
   </div>
@@ -102,6 +118,7 @@
     </div>
   </div>
 
+  <!--INITIAL_STATE-->
   <script src="/static/app.js"></script>
 </body>
 </html>
