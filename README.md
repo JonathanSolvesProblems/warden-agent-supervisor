@@ -137,6 +137,8 @@ Cloud Run / Agent Runtime deployment.
 
 ## Architecture
 
+![Warden architecture diagram](preview/architecture.png)
+
 | Layer | Component | Tech |
 |---|---|---|
 | Brain | `warden/supervisor` | Gemini via the `google-genai` SDK (Flash on the loop, Pro on Vertex paid quota), with a scripted fallback for offline dev |
