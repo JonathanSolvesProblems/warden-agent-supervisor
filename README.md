@@ -142,10 +142,50 @@ Cloud Run / Agent Runtime deployment.
 | Brain | `warden/supervisor` | Gemini via the `google-genai` SDK (Flash on the loop, Pro on Vertex paid quota), with a scripted fallback for offline dev |
 | Senses | `warden/dynatrace` | Dynatrace MCP server (mock mirror for offline dev) |
 | Hands | `warden/supervisor/interventions.py` | pause / rollback / alert behind a human-approval gate |
-| Subjects | `warden/agents` | simulated worker-agent fleet, OpenTelemetry-instrumented |
+| Subjects | `warden/agents` | config-driven worker-agent fleet, OpenTelemetry-instrumented |
 | Stress | `warden/chaos` | injects realistic rogue-agent scenarios |
 | Surface | `warden/web` | stdlib HTTP server, server-sent-events live console |
 | Deploy | docs/DEPLOY.md | Agent Runtime or Cloud Run, with Secret Manager |
+
+## Scaling to N agents
+
+Warden's fleet is N-agent by construction. Adding a new worker is two steps,
+neither of which touches the supervisor:
+
+```python
+# 1. write the worker, register the type
+from warden.agents import WorkerAgent, register_worker
+
+@register_worker
+class PaymentsAgent(WorkerAgent):
+    domain = "payments"
+    def _tick_normal(self): self._emit("heartbeat")
+    def _tick_rogue(self):  self._emit("action", action_type="settle",
+                                       value_usd=900, reversible=False)
+```
+
+```json
+// 2. add a row to warden/agents/fleet_config.json
+{"fleet": [
+  {"id": "refund-agent",    "type": "RefundAgent"},
+  {"id": "pricing-agent",   "type": "PricingAgent"},
+  {"id": "inventory-agent", "type": "InventoryAgent"},
+  {"id": "payments-agent",  "type": "PaymentsAgent"}
+]}
+```
+
+That is it. The supervisor loop iterates `fleet.agents.values()`. The Dynatrace
+MCP sense organ does not care which `agent.id` reported the problem. The Gemini
+brain takes the diagnosis as input. The policy gate, the intervention layer,
+the OTel exporter, and the operator console all key off `agent.id`. The
+three-agent demo is a chaos-injection seed, not an architectural ceiling.
+
+In a real deployment, `fleet_config.json` is swapped for the customer's service
+registry, a Secret Manager URL, or a control-plane API that calls
+`fleet.add(WorkerProxy(agent_id))` for every onboarded ADK / LangChain /
+third-party agent. Unknown worker types in the config are skipped with a
+logged warning rather than crashing, so a typo in production cannot take the
+supervisor down. Covered by `tests/test_fleet_config.py`.
 
 ## Status
 

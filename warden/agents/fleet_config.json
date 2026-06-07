@@ -1,0 +1,7 @@
+{
+  "fleet": [
+    {"id": "refund-agent",    "type": "RefundAgent"},
+    {"id": "pricing-agent",   "type": "PricingAgent"},
+    {"id": "inventory-agent", "type": "InventoryAgent"}
+  ]
+}

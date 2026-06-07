@@ -7,7 +7,15 @@ observes them through Dynatrace.
 
 from .base import WorkerAgent
 from .fleet import Fleet
-from .workers import InventoryAgent, PricingAgent, RefundAgent, default_fleet
+from .workers import (
+    WORKER_REGISTRY,
+    InventoryAgent,
+    PricingAgent,
+    RefundAgent,
+    default_fleet,
+    load_fleet_from_config,
+    register_worker,
+)
 
 __all__ = [
     "WorkerAgent",
@@ -15,5 +23,8 @@ __all__ = [
     "RefundAgent",
     "PricingAgent",
     "InventoryAgent",
+    "WORKER_REGISTRY",
+    "register_worker",
+    "load_fleet_from_config",
     "default_fleet",
 ]
