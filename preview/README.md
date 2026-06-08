@@ -6,7 +6,7 @@ Save each image into this folder with the canonical filename so the demo-video s
 
 | Suggested filename | What it shows | Demo-video beat |
 |---|---|---|
-| `warden-spans-list-808.png` | Distributed Tracing app, Spans view, `service.name = "warden"` filter, 808 spans, timeseries chart with the two `otel_smoke` activity bursts | Around 1:20, when narrating "every action emits a span" |
+| `warden-spans-list-808.png` | Distributed Tracing app, Spans view, `service.name = "warden"` filter, 400+ spans per `otel_smoke.py` run, timeseries chart with one or more activity bursts | Around 1:20, when narrating "every action emits a span" |
 | `warden-span-detail.png` | Single `agent.action` span opened in the side pane, Core section showing span kind / name / duration / start / end | Around 1:30, when zooming in on a single agent action |
 | `warden-metrics-by-agent.png` | Notebooks DQL chart: `timeseries actions = sum(warden.agent.actions), by: { agent.id }`, three colored series (inventory-agent / pricing-agent / refund-agent) | Around 1:40, when claiming "measured per agent, not just totals" |
 

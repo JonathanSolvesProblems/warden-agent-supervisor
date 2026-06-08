@@ -38,7 +38,7 @@ EVIDENCE = [
     {
         "id": "spans-list",
         "file": "warden-spans-list-808.png",
-        "title": "808 OpenTelemetry spans in Dynatrace",
+        "title": "Live OpenTelemetry spans in Dynatrace",
         "caption": (
             "Distributed Tracing view, filtered to service.name = warden. "
             "Every span here came out of Warden's worker fleet via OTLP/HTTP."

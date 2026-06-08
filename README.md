@@ -199,11 +199,12 @@ tenant. Both data planes are real:
 - **Live Gemini diagnosis**: structured `Diagnosis` returned in 2 seconds on a
   synthetic Dynatrace problem (failure_class, severity, recommended_action,
   blast_radius_usd, confidence).
-- **Live OpenTelemetry push to Dynatrace**: 808+ `agent.action` and
-  `agent.error` spans visible in Distributed Tracing under
-  `service.name = warden`, plus `warden.agent.actions`, `warden.agent.errors`,
-  `warden.agent.latency_ms`, `warden.agent.cost_usd`, `warden.agent.value_usd`
-  metrics broken down by `agent.id` (`scripts/otel_smoke.py`).
+- **Live OpenTelemetry push to Dynatrace**: 400+ `agent.action` and
+  `agent.error` spans per `otel_smoke.py` run visible in Distributed Tracing
+  under `service.name = warden`, plus `warden.agent.actions`,
+  `warden.agent.errors`, `warden.agent.latency_ms`, `warden.agent.cost_usd`,
+  `warden.agent.value_usd` metrics broken down by `agent.id`
+  (`scripts/otel_smoke.py`).
 - **Benchmark**: 100% detection across 3 scenarios, 0% false-positive on 30
   healthy episodes, 1-tick median MTTD.
 
