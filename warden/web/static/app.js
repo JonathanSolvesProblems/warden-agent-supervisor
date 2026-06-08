@@ -263,7 +263,11 @@ $("reset-btn").onclick = async () => {
 };
 $("modal-close").onclick = closeIncident;
 $("modal").onclick = (e) => { if (e.target.id === "modal") closeIncident(); };
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeIncident(); });
+$("image-modal-close").onclick = closeImageModal;
+$("image-modal").onclick = (e) => { if (e.target.id === "image-modal") closeImageModal(); };
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeIncident(); closeImageModal(); }
+});
 
 const EVIDENCE_TAGS = {
   "spans-list":       ["DQL: fetch spans | summarize count()", "Distributed Tracing UI", "service.name = warden"],
@@ -279,7 +283,7 @@ function renderEvidence(items) {
     card.className = "evidence-card";
     const tags = (EVIDENCE_TAGS[item.id] || []).map(t => `<span>${escapeHtml(t)}</span>`).join("");
     const frame = item.available
-      ? `<img src="/preview/${item.file}" alt="${escapeHtml(item.title)}" loading="lazy" />`
+      ? `<img src="/preview/${item.file}" alt="${escapeHtml(item.title)}" loading="lazy" tabindex="0" data-caption="${escapeHtml(item.caption)}" />`
       : `<div class="placeholder">
            <strong>${escapeHtml(item.title)}</strong>
            live tenant capture pending<br/>
@@ -292,6 +296,28 @@ function renderEvidence(items) {
       <div class="tags">${tags}</div>`;
     grid.appendChild(card);
   });
+  grid.querySelectorAll(".evidence-card img").forEach((el) => {
+    el.addEventListener("click", () => openImageModal(el.src, el.alt, el.dataset.caption || ""));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openImageModal(el.src, el.alt, el.dataset.caption || "");
+      }
+    });
+  });
+}
+
+function openImageModal(src, alt, caption) {
+  const img = $("image-modal-img");
+  img.src = src;
+  img.alt = alt || "";
+  $("image-modal-caption").textContent = caption || "";
+  $("image-modal").classList.remove("hidden");
+}
+
+function closeImageModal() {
+  $("image-modal").classList.add("hidden");
+  $("image-modal-img").src = "";  // release the bytes from the DOM cache
 }
 
 async function loadEvidence() {
