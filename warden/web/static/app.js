@@ -85,6 +85,9 @@ function renderIncidents(incidents) {
     const card = document.createElement("div");
     card.className = "incident clickable";
     card.title = "Click for full diagnosis, plan, and actions";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `Open incident ${i.incident_id} on ${i.suspect_agent}, severity ${i.diagnosis.severity}`);
     card.innerHTML = `
       <div class="ihead">
         <span>${i.incident_id} &middot; ${i.suspect_agent}${pill}</span>
@@ -99,6 +102,12 @@ function renderIncidents(incidents) {
         prevented (est.) ${money(i.projected_loss_prevented)}
       </div>`;
     card.onclick = () => openIncident(i.incident_id);
+    card.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openIncident(i.incident_id);
+      }
+    };
     el.appendChild(card);
   });
 }
