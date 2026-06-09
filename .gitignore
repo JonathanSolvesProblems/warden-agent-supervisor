@@ -38,3 +38,6 @@ COVER.md
 
 # Dev-only fonts bundled to regenerate preview/cover.png; not runtime assets
 preview/.fonts/
+
+# workflow-agent temp paths that got flattened to repo root
+UsersJon_A*
