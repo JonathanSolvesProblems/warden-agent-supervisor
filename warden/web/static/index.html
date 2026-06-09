@@ -34,6 +34,15 @@
     <button class="tab" id="tab-evidence" role="tab" aria-selected="false" aria-controls="view-evidence">Live Evidence (Dynatrace)</button>
   </nav>
 
+  <section class="mode-banner" aria-label="Mode information">
+    <span class="mode-banner-tag">SIM</span>
+    <span class="mode-banner-text">
+      Hosted demo runs in sim mode for judging-week stability (deterministic loop, instant replay). Live mode against the real Dynatrace tenant is verified by
+      <code>scripts/live_check.py</code> + <code>scripts/otel_smoke.py</code>; captures are in the
+      <button type="button" class="mode-banner-link" id="mode-banner-evidence-link">Live Evidence tab</button>.
+    </span>
+  </section>
+
   <div id="view-console" role="tabpanel" aria-labelledby="tab-console">
     <section id="approval-banner" class="approval hidden">
       <div class="approval-text">
@@ -52,6 +61,20 @@
       <div class="metric good"><span class="m-label">$ recovered (hard)</span><span class="m-value" id="m-recovered">$0</span></div>
       <div class="metric bad"><span class="m-label">$ irreversible loss</span><span class="m-value" id="m-loss">$0</span></div>
       <div class="metric"><span class="m-label">$ loss prevented (est.)</span><span class="m-value" id="m-prevented">$0</span></div>
+    </section>
+
+    <section class="bench-strip" aria-label="Latest offline benchmark">
+      <div class="bench-strip-head">
+        <span class="bench-strip-eyebrow">Latest benchmark</span>
+        <span class="bench-strip-caption">90 episodes &middot; 3 scenarios &times; 30 seeds &middot; <code>scripts/bench.py</code></span>
+      </div>
+      <div class="bench-strip-cells">
+        <div class="bench-cell"><span class="bench-k">Detection</span><span class="bench-v good">100%</span></div>
+        <div class="bench-cell"><span class="bench-k">False-positive (30 healthy)</span><span class="bench-v good">0.00%</span></div>
+        <div class="bench-cell"><span class="bench-k">Median MTTD</span><span class="bench-v">1 tick</span></div>
+        <div class="bench-cell"><span class="bench-k">$ recovered (reversible)</span><span class="bench-v gold">$336-$409</span></div>
+        <div class="bench-cell"><span class="bench-k">$ recovered (refund fraud)</span><span class="bench-v">$0 honest</span></div>
+      </div>
     </section>
 
     <main class="grid">

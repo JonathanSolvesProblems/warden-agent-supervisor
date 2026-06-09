@@ -93,17 +93,32 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _evidence_manifest(self) -> dict:
+        """Same data as /api/evidence. Factored out so /api/evidence and the
+        inlined window.__WARDEN_INITIAL__ stay byte-identical."""
+        return {
+            "items": [
+                {**item, "available": os.path.isfile(os.path.join(PREVIEW_DIR, item["file"]))}
+                for item in EVIDENCE
+            ]
+        }
+
     def _send_index(self) -> None:
-        """Serve index.html with the current Warden snapshot inlined.
+        """Serve index.html with the current Warden snapshot + evidence inlined.
 
         Without this, a fresh page renders empty panels for the second or two
         between DOMContentLoaded and the first fetch('/api/state'). With it,
-        the operator console has live data on the very first paint.
+        the operator console has live data on the very first paint, and the
+        Live Evidence tab paints instantly on tab switch instead of flashing
+        blank for the 50-100ms it would otherwise take to fetch /api/evidence.
         """
         path = os.path.join(STATIC_DIR, "index.html")
         with open(path, "rb") as fh:
             html = fh.read()
-        snapshot = json.dumps(RUNNER.snapshot(), default=str)
+        # Combine operator state + evidence manifest into one inline payload.
+        initial = RUNNER.snapshot()
+        initial["evidence"] = self._evidence_manifest()
+        snapshot = json.dumps(initial, default=str)
         # Defend against JSON containing '</' which would close the script tag.
         snapshot = snapshot.replace("</", "<\\/")
         payload = f'<script>window.__WARDEN_INITIAL__={snapshot};</script>'.encode("utf-8")
@@ -138,10 +153,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/state":
             self._send_json(RUNNER.snapshot())
         elif path == "/api/evidence":
-            self._send_json({"items": [
-                {**item, "available": os.path.isfile(os.path.join(PREVIEW_DIR, item["file"]))}
-                for item in EVIDENCE
-            ]})
+            self._send_json(self._evidence_manifest())
         elif path == "/events":
             self._stream_events()
         else:

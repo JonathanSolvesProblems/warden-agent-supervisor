@@ -58,6 +58,7 @@ def main() -> int:
     expected_filter = {
         "list_problems",
         "execute_dql",
+        "generate_dql_from_natural_language",
         "chat_with_davis_copilot",
         "create_workflow_for_notification",
     }

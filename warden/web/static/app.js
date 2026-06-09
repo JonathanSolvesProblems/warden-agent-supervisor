@@ -353,6 +353,9 @@ function selectTab(which) {
 $("tab-console").onclick = () => selectTab("console");
 $("tab-evidence").onclick = () => selectTab("evidence");
 
+const bannerLink = document.getElementById("mode-banner-evidence-link");
+if (bannerLink) bannerLink.addEventListener("click", () => selectTab("evidence"));
+
 (async function init() {
   // window.__WARDEN_INITIAL__ is server-rendered into index.html so the
   // operator console paints with live data on the very first frame.
@@ -362,5 +365,11 @@ $("tab-evidence").onclick = () => selectTab("evidence");
   if (!s) s = await (await fetch("/api/state")).json();
   renderScenarios(s.scenarios);
   applyState(s);
+  // Server now also inlines the evidence manifest so the Live Evidence tab
+  // paints instantly when switched to, rather than flashing blank for the
+  // 50-100ms it would otherwise take to fetch /api/evidence.
+  if (s.evidence && Array.isArray(s.evidence.items)) {
+    renderEvidence(s.evidence.items);
+  }
   connect();
 })();

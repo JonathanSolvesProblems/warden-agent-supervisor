@@ -1,25 +1,18 @@
 """Warden as a Google Cloud Agent Builder / ADK agent.
 
-This module is the canonical Agent Builder integration shape for Warden: an
-ADK `LlmAgent` powered by **Gemini 3** (via the `gemini-flash-latest` alias)
-wired to the **Dynatrace MCP server** via `McpToolset`. It is the deployment
-target for Agent Runtime / Agent Engine.
+This module is the canonical Agent Builder deployment shape for Warden: an
+ADK `LlmAgent` powered by **Gemini 3** (via the `gemini-flash-latest` alias on
+Vertex AI) wired to the **Dynatrace MCP server** via `McpToolset`. It is the
+target for `gcloud agents deploy` / Agent Runtime / Agent Engine.
 
-Why two entry points coexist:
-
-* `warden/adk_agent.py` (this file) is the canonical Agent-Builder-native
-  wiring a judge or operator can verify the hackathon stack from in one place,
-  and what `gcloud run deploy` / `gcloud agents deploy` ships in production.
-* `warden/supervisor/loop.py` is the deterministic governance harness that
-  runs in the demo today, calling Gemini directly via the `google-genai` SDK.
-  It exists because the policy gate, the deterministic money math, and the
-  human-in-the-loop approval are safety guarantees that need to be enforced in
-  code, not in a prompt (see SUBMISSION.md, the deterministic-vs-generative
-  thesis).
-
-Both entry points use the same Gemini 3 family models and the same Dynatrace
-MCP server. The ADK form is what Agent Builder would orchestrate end-to-end if
-the policy gate were not load-bearing.
+The runtime supervisor in `warden/supervisor/loop.py` is the policy harness
+that wraps this Agent Builder agent: it enforces the deterministic governance
+guarantees (the dollar math, the reversibility flag, the human-in-the-loop
+approval gate for irreversible / high-blast-radius actions) that have to be
+enforced in code, not in a prompt. The supervisor loop calls Gemini through
+the `google-genai` SDK with the same Gemini 3 model and the same MCP toolset
+this ADK form exposes, so the two paths stay in sync; the tool_filter below
+is the single source of truth for which Dynatrace MCP tools Warden invokes.
 
 Requires Python 3.10 to 3.13 (Google ADK does not yet target 3.14) plus the
 `google-adk`, `google-genai`, and `mcp` packages. Imports are deferred inside
@@ -44,13 +37,16 @@ _INSTRUCTION = (
 def build_warden_agent():
     """Return a Google Cloud Agent Builder `LlmAgent` wired to Gemini 3 + Dynatrace MCP.
 
-    The agent uses Gemini 3 Flash for the high-frequency monitoring loop (set
-    via `WARDEN_GEMINI_MODEL`) and can be upgraded to Gemini 3 Pro for hard
-    reasoning. It consumes the Dynatrace MCP server as its only sense organ,
-    with a `tool_filter` that narrows the 20 available tools to the four
-    Warden actually invokes. This satisfies the principle of least privilege
-    that the Atlassian Rovo MCP launch (2026-05-27) and Dynatrace's own
-    governance docs recommend for production MCP integrations.
+    The agent uses Gemini 3 Flash on Vertex AI for the supervisory loop
+    (model alias selected via `WARDEN_GEMINI_MODEL`, default `gemini-flash-latest`).
+    It consumes the Dynatrace MCP server as its only sense organ, with a
+    `tool_filter` that narrows the 20 available tools to the FIVE Warden
+    actually invokes. This satisfies the principle of least privilege that
+    Dynatrace's own governance docs recommend for production MCP integrations.
+
+    The tool_filter is the single source of truth and must stay in lockstep
+    with the live mode supervisor in `warden/supervisor/loop.py`; the
+    `scripts/adk_smoke.py` smoke test asserts the filter matches.
     """
     from google.adk.agents import LlmAgent
     from google.adk.tools.mcp_tool import McpToolset
@@ -73,17 +69,23 @@ def build_warden_agent():
                 env=dynatrace_env,
             ),
         ),
-        # Principle of least privilege: only the tools Warden actually invokes.
+        # Principle of least privilege: only the tools Warden actually invokes
+        # in the live supervisor loop. Five tools across observability
+        # (list_problems), telemetry query (execute_dql,
+        # generate_dql_from_natural_language for Davis NL2DQL), reasoning
+        # (chat_with_davis_copilot), and remediation
+        # (create_workflow_for_notification).
         tool_filter=[
             "list_problems",
             "execute_dql",
+            "generate_dql_from_natural_language",
             "chat_with_davis_copilot",
             "create_workflow_for_notification",
         ],
     )
 
     return LlmAgent(
-        model=config.GEMINI.model,  # gemini-flash-latest, Gemini 3 Flash family
+        model=config.GEMINI.model,  # gemini-flash-latest, Gemini 3 Flash on Vertex AI
         name="warden",
         instruction=_INSTRUCTION,
         tools=[dynatrace_mcp],

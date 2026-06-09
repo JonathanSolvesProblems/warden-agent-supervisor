@@ -111,21 +111,44 @@ class GeminiBrain:
             dropped=dropped,
             log_path=config.PRIVACY.audit_log_path,
         )
-        data = json.loads(resp.text)
+        # Defensive parse: a transient Vertex 5xx, truncated structured-output
+        # response, or upstream schema drift can yield non-JSON or partial
+        # JSON. Falling back to a conservative scripted diagnosis keeps the
+        # supervisor loop alive and the dashboard responsive instead of
+        # propagating a parse exception up through SimRunner.
+        try:
+            data = json.loads(resp.text or "")
+            severity = int(data["severity"])
+            failure_class = data["failure_class"]
+            confidence = round(float(data["confidence"]), 2)
+            summary = data["summary"]
+            recommended_action = data["recommended_action"]
+        except (json.JSONDecodeError, KeyError, ValueError, TypeError, AttributeError) as exc:
+            print(
+                f"[warden] gemini brain response unparseable ({type(exc).__name__}); "
+                f"falling back to conservative scripted diagnosis for {agent}"
+            )
+            severity = 5 if not reversible else 4
+            failure_class = "anomalous_high_value_action" if not reversible else "anomaly"
+            confidence = 0.5
+            summary = (
+                f"Gemini response unparseable; conservative fallback for {agent}. "
+                f"Treating as high-risk pending operator review."
+            )
+            recommended_action = "pause"
 
         # Severity floor: large blast radius is always critical regardless of model.
-        severity = int(data["severity"])
         if value_at_risk >= config.THRESHOLDS.human_approval_blast_usd:
             severity = max(severity, 5)
 
         return Diagnosis(
             suspect_agent=agent,
-            failure_class=data["failure_class"],
+            failure_class=failure_class,
             severity=severity,
             blast_radius_usd=value_at_risk,
             reversible=reversible,
-            confidence=round(float(data["confidence"]), 2),
-            summary=data["summary"],
-            recommended_action=data["recommended_action"],
+            confidence=confidence,
+            summary=summary,
+            recommended_action=recommended_action,
             reasoned_by="gemini",
         )

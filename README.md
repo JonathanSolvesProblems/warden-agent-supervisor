@@ -11,18 +11,26 @@ state, scenario injectors, human-gated approvals, incident audit trails) and
 landing in a Dynatrace tenant, with the DQL queries and span attributes
 documented inline).
 
-Warden is an autonomous agent-reliability supervisor built on **Gemini 3**
-(via the `gemini-flash-latest` and `gemini-pro-latest` aliases on Google Cloud
-Agent Builder / Vertex) and the **Dynatrace MCP server**. It watches a fleet
-of production AI agents, and when one goes rogue, Warden catches it, diagnoses
-it, and contains it under human oversight before it does more damage.
+Warden is an autonomous agent-reliability supervisor built on **Gemini 3** (via
+the `gemini-flash-latest` alias on **Vertex AI**, deployed through **Google
+Cloud Agent Builder ADK**) and the **Dynatrace MCP server** (real tenant:
+`xwy37883.apps.dynatrace.com`). It watches a fleet of production AI agents,
+and when one goes rogue, Warden catches it, diagnoses it, and contains it
+under human oversight before it does more damage.
+
+The hackathon brief named three real-world challenge themes: World Cup
+logistics, financial services, and brick-and-mortar retail. The demo headlines
+**financial services** with a rogue refund agent, but the same loop
+generalizes to any fleet: register a new worker type via `fleet_config.json`
+and Warden supervises World Cup vendor agents, retail inventory agents, or
+loan-workflow agents with no supervisor-side change.
 
 ## How Warden meets the hackathon's "Build Your Agent" criteria
 
 | Requirement | How Warden satisfies it | File |
 |---|---|---|
-| Built with **Gemini 3** | `gemini-flash-latest` and `gemini-pro-latest` aliases resolve to Gemini 3 family models. Verified at runtime against the live tenant (the API returned `model: gemini-3.1-pro` during testing). | `warden/config.py`, `warden/supervisor/gemini_brain.py` |
-| Using **Google Cloud Agent Builder** | Canonical ADK `LlmAgent` + `McpToolset` wiring lives in code as the production deploy target for Agent Runtime / Agent Engine. The supervisor loop also calls Gemini via the `google-genai` SDK on the same Vertex / Agent Builder surface (code-first instead of low-code), with `tool_filter` enforcing least privilege on the four MCP tools Warden invokes. | `warden/adk_agent.py`, `docs/DEPLOY.md` |
+| Built with **Gemini 3** | `gemini-flash-latest` on **Vertex AI** resolves to a Gemini 3 family model (`gemini-3-flash-preview` per the Gemini API changelog Jan 21 / Mar 6 2026 entries). Verified at runtime against the live tenant. | `warden/config.py`, `warden/supervisor/gemini_brain.py` |
+| Using **Google Cloud Agent Builder** | Canonical ADK `LlmAgent` + `McpToolset` wiring as the production deploy target for Agent Runtime / Agent Engine. The supervisor loop calls Gemini through the `google-genai` SDK on the same Vertex AI surface, with `tool_filter` enforcing least privilege on the five Dynatrace MCP tools Warden actually invokes (`list_problems`, `execute_dql`, `generate_dql_from_natural_language`, `chat_with_davis_copilot`, `create_workflow_for_notification`). `scripts/adk_smoke.py` asserts the filter matches what the runtime supervisor calls. | `warden/adk_agent.py`, `scripts/adk_smoke.py`, `docs/DEPLOY.md` |
 | Integrate the partner's **MCP server** | Dynatrace MCP server (`@dynatrace-oss/dynatrace-mcp-server`) is Warden's only sense organ. 20 tools enumerated live, `list_problems`, `execute_dql`, and `chat_with_davis_copilot` all verified end-to-end against the tenant. | `warden/dynatrace/mcp_client.py` |
 | Move beyond chat (use tools, take action) | Pause, rollback, alert, and Dynatrace workflow creation are real actions executed behind a human-approval gate, not just answers. | `warden/supervisor/interventions.py`, `warden/supervisor/policies.py` |
 | Multi-step mission with human in control | Sense -> reason -> decide -> act -> prove, with a real blocking gate for irreversible / high-blast-radius actions. | `warden/supervisor/loop.py` |
@@ -141,7 +149,7 @@ Cloud Run / Agent Runtime deployment.
 
 | Layer | Component | Tech |
 |---|---|---|
-| Brain | `warden/supervisor` | Gemini via the `google-genai` SDK (Flash on the loop, Pro on Vertex paid quota), with a scripted fallback for offline dev |
+| Brain | `warden/supervisor` | Gemini 3 on Vertex AI via the `google-genai` SDK (Flash on the loop), with a defensive scripted fallback for offline dev and for any transient model error |
 | Senses | `warden/dynatrace` | Dynatrace MCP server (mock mirror for offline dev) |
 | Hands | `warden/supervisor/interventions.py` | pause / rollback / alert behind a human-approval gate |
 | Subjects | `warden/agents` | config-driven worker-agent fleet, OpenTelemetry-instrumented |
@@ -208,7 +216,12 @@ tenant. Both data planes are real:
 - **Benchmark**: 100% detection across 3 scenarios, 0% false-positive on 30
   healthy episodes, 1-tick median MTTD.
 
-Pending: demo video upload. See [docs/ROADMAP.md](docs/ROADMAP.md).
+The hosted dashboard runs in sim mode for judging-week stability (deterministic
+loop, instant replay). The same code path runs in live mode against the real
+Dynatrace tenant; the **Live Evidence** tab on the hosted URL surfaces three
+captures from that tenant. Live-mode reproduction is one command:
+`python -m scripts.live_check` (MCP handshake + Gemini diagnosis) plus
+`python -m scripts.otel_smoke` (OTLP into Distributed Tracing).
 
 ## License
 
