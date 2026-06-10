@@ -47,3 +47,6 @@ UsersJon_A*
 *.mp4
 *.wav
 GoogleCloud*
+
+# local-only playwright tooling for capturing Devpost gallery shots
+.tools-screenshot/
