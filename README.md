@@ -5,10 +5,8 @@
 **Live demo (Cloud Run, sim mode, no login required):**
 **https://warden-qfobjfyspq-uc.a.run.app**
 
-**3-minute demo video:**
+**3-minute demo video (YouTube):**
 **https://www.youtube.com/watch?v=1jlnireC0D4**
-
-[![Watch the demo](https://img.youtube.com/vi/1jlnireC0D4/maxresdefault.jpg)](https://www.youtube.com/watch?v=1jlnireC0D4)
 
 The hosted dashboard has two tabs: **Operator console** (live reasoning, fleet
 state, scenario injectors, human-gated approvals, incident audit trails) and
