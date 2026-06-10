@@ -41,3 +41,9 @@ preview/.fonts/
 
 # workflow-agent temp paths that got flattened to repo root
 UsersJon_A*
+
+# local audio/video recordings (do not push to repo)
+*.mov
+*.mp4
+*.wav
+GoogleCloud*
