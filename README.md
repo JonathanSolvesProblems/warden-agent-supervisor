@@ -223,6 +223,40 @@ captures from that tenant. Live-mode reproduction is one command:
 `python -m scripts.live_check` (MCP handshake + Gemini diagnosis) plus
 `python -m scripts.otel_smoke` (OTLP into Distributed Tracing).
 
+## References + citations
+
+Everything the project narration cites, in one place. Every quote, stat, and product name in the README, the SUBMISSION, and the demo video traces back to one of these sources.
+
+**Hackathon**
+- Google Cloud Rapid Agent Hackathon brief and rules: https://rapid-agent.devpost.com/
+
+**Google Cloud products**
+- Vertex AI: https://cloud.google.com/vertex-ai
+- Vertex AI Gemini 3 models: https://cloud.google.com/vertex-ai/generative-ai/docs/models
+- Google Cloud Agent Builder: https://cloud.google.com/products/agent-builder
+- Agent Development Kit (ADK) docs: https://google.github.io/adk-docs/
+- Cloud Run: https://cloud.google.com/run
+- Gemini API changelog (model alias resolution to Gemini 3 family): https://ai.google.dev/gemini-api/docs/changelog
+
+**Dynatrace**
+- Dynatrace MCP server (GitHub, dynatrace-oss): https://github.com/dynatrace-oss/dynatrace-mcp
+- Dynatrace MCP server blog post: https://www.dynatrace.com/news/blog/dynatrace-mcp-server-allow-ai-interact-dynatrace-access-production-insights/
+- Davis AI: https://www.dynatrace.com/platform/artificial-intelligence/
+- Davis Copilot: https://www.dynatrace.com/platform/artificial-intelligence/davis-copilot/
+- Dynatrace OpenTelemetry ingest docs: https://docs.dynatrace.com/docs/ingest-from/opentelemetry
+
+**Dynatrace research, quotes, and judge intel**
+- Pulse of Agentic AI 2026 press release (51% monitoring blocker, 69% human-verified, 23% mature): https://www.dynatrace.com/news/press-release/pulse-of-agentic-ai-2026/
+- Pulse of Agentic AI 2026 report page: https://www.dynatrace.com/info/reports/the-pulse-of-agentic-ai-in-2026/
+- Bernd Greifeneder, Dynatrace CTO, on the new KPI ("percentage of human intervention required"): https://www.dynatrace.com/news/blog/ai-agents-are-redefining-software-development-but-theyre-flying-blind-without-observability/
+- Jeff Blankenburg, Dynatrace Principal Developer Advocate, on observability replacing manual code review (10 things I learned writing 49,000 words about vibe coding): https://www.dynatrace.com/news/blog/10-things-i-learned-writing-49000-words-about-vibe-coding/
+
+**Standards + safety map**
+- OWASP Top 10 for LLM Applications 2025, LLM06 Excessive Agency: https://genai.owasp.org/llmrisk/llm062025-excessive-agency/
+- NIST AI Risk Management Framework (AI RMF 1.0): https://www.nist.gov/itl/ai-risk-management-framework
+- ISO/IEC 42001:2023 (AI management systems): https://www.iso.org/standard/42001
+- EU AI Act Article 14 (Human oversight): https://artificialintelligenceact.eu/article/14/
+
 ## License
 
 [Apache 2.0](LICENSE).
