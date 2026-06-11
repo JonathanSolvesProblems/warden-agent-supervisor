@@ -8,6 +8,9 @@
 **3-minute demo video (YouTube):**
 **https://www.youtube.com/watch?v=1jlnireC0D4**
 
+**Project blog post:**
+**https://jonathanandrei.com/blog/warden-agent-that-governs-your-agents**
+
 The hosted dashboard has two tabs: **Operator console** (live reasoning, fleet
 state, scenario injectors, human-gated approvals, incident audit trails) and
 **Live Evidence** (screenshots of real OpenTelemetry traces and per-agent metrics
